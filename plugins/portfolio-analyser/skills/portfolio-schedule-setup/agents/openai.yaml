@@ -1,0 +1,6 @@
+interface:
+  display_name: "Portfolio Schedule Setup"
+  short_description: "Research- und Briefing-Jobs einrichten"
+  default_prompt: "Use $portfolio-schedule-setup to configure recurring Portfolio Analyser research and briefing jobs."
+policy:
+  allow_implicit_invocation: true

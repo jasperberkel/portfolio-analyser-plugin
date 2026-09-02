@@ -9,8 +9,8 @@
     {
       "name": "portfolio-analyser",
       "source": "./plugins/portfolio-analyser",
-      "description": "Portfolio import, position research, market research, and actionable portfolio briefings.",
-      "version": "0.1.0",
+      "description": "Portfolio import, research, briefings, and recurring schedule setup.",
+      "version": "0.2.0",
       "author": {
         "name": "Jasper Berkel"
       },

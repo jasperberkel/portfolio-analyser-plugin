@@ -1,7 +1,7 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.1.0",
-  "description": "Import portfolios, research positions and market opportunities, and create actionable portfolio briefings.",
+  "version": "0.2.0",
+  "description": "Import portfolios, research positions and market opportunities, create briefings, and configure recurring jobs.",
   "author": {
     "name": "Jasper Berkel",
     "url": "https://github.com/jasperberkel"
@@ -12,8 +12,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Portfolio Analyser",
-    "shortDescription": "Portfolio import, research, and briefings",
-    "longDescription": "Connect Codex to Portfolio Analyser workflows for importing holdings, researching positions and opportunities, and publishing portfolio briefings.",
+    "shortDescription": "Portfolio research, briefings, and schedules",
+    "longDescription": "Connect Codex to Portfolio Analyser workflows for importing holdings, researching positions and opportunities, publishing briefings, and scheduling recurring runs.",
     "developerName": "Jasper Berkel",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
@@ -21,7 +21,7 @@
     "defaultPrompt": [
       "Import my portfolio documents into Portfolio Analyser.",
       "Research the largest positions in my portfolio.",
-      "Create a current portfolio briefing."
+      "Set up recurring portfolio research and briefing jobs."
     ]
   }
 }

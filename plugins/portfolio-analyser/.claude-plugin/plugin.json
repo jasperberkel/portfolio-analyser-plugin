@@ -1,7 +1,7 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.1.0",
-  "description": "Import portfolios, research positions and market opportunities, and create actionable portfolio briefings.",
+  "version": "0.2.0",
+  "description": "Import portfolios, research positions and market opportunities, create briefings, and configure recurring jobs.",
   "author": {
     "name": "Jasper Berkel",
     "url": "https://github.com/jasperberkel"
