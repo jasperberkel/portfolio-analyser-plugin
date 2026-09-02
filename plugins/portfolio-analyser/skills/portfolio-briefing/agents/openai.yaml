@@ -1,0 +1,13 @@
+interface:
+  display_name: "Portfolio Briefing"
+  short_description: "Konkrete Portfolioaktionen aus allen Berichten"
+  default_prompt: "Use $portfolio-briefing to create current evidence-linked portfolio recommendations."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "portfolio_analyser"
+      description: "Lokale Portfolio-App für Briefing-Kontext und Veröffentlichung"
+      transport: "streamable_http"
+      url: "http://127.0.0.1:8010/mcp"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,13 @@
+{
+  "name": "portfolio-analyser",
+  "version": "0.1.0",
+  "description": "Import portfolios, research positions and market opportunities, and create actionable portfolio briefings.",
+  "author": {
+    "name": "Jasper Berkel",
+    "url": "https://github.com/jasperberkel"
+  },
+  "homepage": "https://github.com/jasperberkel/portfolio-analyser-plugin",
+  "repository": "https://github.com/jasperberkel/portfolio-analyser-plugin",
+  "keywords": ["portfolio", "investing", "research", "markets"],
+  "skills": "./skills/"
+}

@@ -1,0 +1,60 @@
+---
+name: market-opportunity-research
+description: Research current non-personalized market opportunities across listed stocks, retail-accessible ETFs and ETCs, major crypto assets, and commodities, then publish a sourced German watchlist report to the local Portfolio Analyser. Use for general investment ideas and market screens; do not inspect or tailor conclusions to the user's portfolio.
+---
+
+# Market Opportunity Research
+
+Create a current, evidence-based German market-opportunity report without reading or considering the user's portfolio.
+
+## Define the scan
+
+Use constraints from the invoking prompt: asset classes, regions, themes, horizon, risk level, number of candidates, exclusions, and whether broker availability must be verified.
+
+When the user gives no constraints:
+
+- scan listed stocks, UCITS ETFs or retail-accessible ETCs, major crypto assets, and commodities;
+- cover near-term (0–6 months), medium-term (6–24 months), and long-term (2–7 years) theses;
+- produce a compact shortlist of 8–12 candidates, without forcing an asset class that lacks convincing evidence;
+- exclude leverage products, CFDs, options, penny stocks, illiquid tokens, and private securities.
+
+Do not call `get_current_positions` or otherwise personalize the scan from portfolio data.
+
+## Discover and verify candidates
+
+Read [references/research-rubric.md](references/research-rubric.md). Always browse using the invocation date as the research cutoff.
+
+Start with a broad evidence scan before choosing candidates. Identify current macro, industry, regulatory, supply/demand, technology, and capital-market developments. Then verify every shortlisted instrument independently.
+
+Prefer primary sources: issuer filings and results, fund-provider product pages and KIDs, exchanges, central banks, regulators, statistical agencies, protocol foundations, and commodity or energy agencies. Use reputable independent reporting for material events that primary sources do not establish or when outside scrutiny is necessary.
+
+For each candidate:
+
+- establish the exact name, ticker or ISIN, asset type, and investment vehicle;
+- check recent news and the newest available fundamental, fund, protocol, or supply/demand evidence;
+- evaluate thesis quality, valuation or product structure, liquidity, catalysts, risks, and invalidation conditions;
+- assign a horizon, risk level, evidence-based tendency, and confidence;
+- verify Trade Republic or another named broker's availability only from a reliable current source. Otherwise say that broker availability was not verified.
+
+Treat “Geheimtipps” as a separate speculative-radar category. Require public tradability, adequate liquidity, credible disclosures, and an evidence-backed thesis. Never use rumors, social-media hype, promotional token claims, or low-float price action as the thesis.
+
+## Write the report
+
+Write one self-contained German Markdown report with inline source links. Include:
+
+- scope, research cutoff, horizons, and material limitations;
+- current market context;
+- a ranked shortlist with identifiers, thesis, horizon, catalyst, principal risk, tendency, and confidence;
+- a detailed section for every candidate;
+- a separate speculative-radar section when justified;
+- rejected or watch-only themes when current evidence does not support inclusion;
+- cross-candidate risks and concrete events or metrics to monitor.
+
+Separate observable facts, interpretation, and conditional scenarios. Use base, upside, and downside cases. Do not issue buy/sell orders, promise returns, imply that a candidate is suitable for the user, or use unsupported price targets. “Interessant” means worthy of further research, not a recommendation.
+
+## Publish
+
+Read [references/mcp-contract.md](references/mcp-contract.md). Generate one analysis UUID and call `publish_analysis` exactly once with analysis type `market.opportunity-research` after the complete report is ready.
+
+Invoking this skill authorizes publication to the local app unless the user explicitly asks for a conversation-only report. Retry a transport-uncertain publish at most once with the same UUID and identical content. Never create or modify a portfolio snapshot.
+

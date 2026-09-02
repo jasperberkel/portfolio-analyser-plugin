@@ -1,0 +1,13 @@
+interface:
+  display_name: "Portfolio Import"
+  short_description: "Portfolio-Dokumente analysieren und synchronisieren"
+  default_prompt: "Use $portfolio-import to analyze these portfolio documents and synchronize the consolidated portfolio."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "portfolio_analyser"
+      description: "Lokale Portfolio-Web-App für Snapshots und Analysen"
+      transport: "streamable_http"
+      url: "http://127.0.0.1:8010/mcp"
+policy:
+  allow_implicit_invocation: true

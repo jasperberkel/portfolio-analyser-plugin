@@ -1,0 +1,13 @@
+interface:
+  display_name: "Portfolio Position Research"
+  short_description: "Portfolio-Positionen auswählen und aktuell bewerten"
+  default_prompt: "Use $portfolio-position-research to research the five largest positions in my current portfolio."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "portfolio_analyser"
+      description: "Lokale Portfolio-App für aktuelle Positionen und Analysen"
+      transport: "streamable_http"
+      url: "http://127.0.0.1:8010/mcp"
+policy:
+  allow_implicit_invocation: true

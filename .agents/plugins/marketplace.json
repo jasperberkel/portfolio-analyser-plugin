@@ -1,0 +1,20 @@
+{
+  "name": "portfolio-analyser",
+  "interface": {
+    "displayName": "Portfolio Analyser"
+  },
+  "plugins": [
+    {
+      "name": "portfolio-analyser",
+      "source": {
+        "source": "local",
+        "path": "./plugins/portfolio-analyser"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

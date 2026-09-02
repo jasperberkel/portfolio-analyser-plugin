@@ -1,0 +1,13 @@
+interface:
+  display_name: "Market Opportunity Research"
+  short_description: "Aktuelle Marktchancen recherchieren und bewerten"
+  default_prompt: "Use $market-opportunity-research to find and assess current market opportunities across stocks, ETFs, crypto, and commodities."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "portfolio_analyser"
+      description: "Lokale Portfolio-App zum Speichern vollständiger Marktberichte"
+      transport: "streamable_http"
+      url: "http://127.0.0.1:8010/mcp"
+policy:
+  allow_implicit_invocation: true

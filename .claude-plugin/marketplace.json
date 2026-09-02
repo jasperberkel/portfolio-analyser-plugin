@@ -1,0 +1,23 @@
+{
+  "name": "portfolio-analyser",
+  "owner": {
+    "name": "Jasper Berkel",
+    "url": "https://github.com/jasperberkel"
+  },
+  "description": "Portfolio Analyser plugins for portfolio and market research workflows.",
+  "plugins": [
+    {
+      "name": "portfolio-analyser",
+      "source": "./plugins/portfolio-analyser",
+      "description": "Portfolio import, position research, market research, and actionable portfolio briefings.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Jasper Berkel"
+      },
+      "homepage": "https://github.com/jasperberkel/portfolio-analyser-plugin",
+      "repository": "https://github.com/jasperberkel/portfolio-analyser-plugin",
+      "keywords": ["portfolio", "investing", "research", "markets"],
+      "category": "Productivity"
+    }
+  ]
+}
