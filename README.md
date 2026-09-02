@@ -8,7 +8,7 @@ Cross-platform plugin marketplace for Codex and Claude Code. It bundles the Port
 - `portfolio-position-research`: research current portfolio positions
 - `market-opportunity-research`: research non-personalized market opportunities
 - `portfolio-briefing`: turn the current portfolio and reports into actionable recommendations
-- `portfolio-schedule-setup`: configure recurring research and briefing jobs for Codex or Claude Code
+- `portfolio-analyser-setup`: discover and configure recurring research and briefing jobs for Codex or Claude Code
 
 ## Prerequisite
 
@@ -38,7 +38,7 @@ In Claude Code, skills are available under the plugin namespace, for example:
 /portfolio-analyser:portfolio-position-research
 /portfolio-analyser:market-opportunity-research
 /portfolio-analyser:portfolio-briefing
-/portfolio-analyser:portfolio-schedule-setup
+/portfolio-analyser:portfolio-analyser-setup
 ```
 
 ## Configure recurring jobs
@@ -49,7 +49,7 @@ After installation, ask Codex or Claude Code:
 Set up the recurring Portfolio Analyser research and briefing jobs.
 ```
 
-The setup skill detects the host, checks existing schedules, and asks for cadence, times, and timezone before making changes. Its default proposal is both research jobs daily at 10:00 and the briefing daily at 11:00.
+The setup skill detects the host and dynamically discovers all plugin skills ending in `-research` or `-briefing`. It checks existing schedules before making changes, then proposes research jobs daily at 10:00 and briefing jobs daily at 11:00. Future skills using either suffix are included automatically.
 
 ## Ask an agent to install it
 

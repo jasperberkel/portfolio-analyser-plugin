@@ -1,0 +1,6 @@
+interface:
+  display_name: "Portfolio Analyser Setup"
+  short_description: "Plugin-Schedules dynamisch einrichten"
+  default_prompt: "Use $portfolio-analyser-setup to configure recurring jobs for all Portfolio Analyser research and briefing skills."
+policy:
+  allow_implicit_invocation: true

@@ -1,6 +1,6 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Import portfolios, research positions and market opportunities, create briefings, and configure recurring jobs.",
   "author": {
     "name": "Jasper Berkel",
@@ -21,7 +21,7 @@
     "defaultPrompt": [
       "Import my portfolio documents into Portfolio Analyser.",
       "Research the largest positions in my portfolio.",
-      "Set up recurring portfolio research and briefing jobs."
+      "Set up recurring jobs for all Portfolio Analyser research and briefing skills."
     ]
   }
 }
