@@ -13,7 +13,7 @@ build() {
   (
     cd "$source_dir"
     CGO_ENABLED=0 GOOS="$target_os" GOARCH="$target_arch" \
-      go build -trimpath -ldflags="-s -w -buildid=" -o "$target_path" .
+      go build -buildvcs=false -trimpath -ldflags="-s -w -buildid=" -o "$target_path" .
   )
 }
 

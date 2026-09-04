@@ -139,7 +139,7 @@ func (b bridge) status(ctx context.Context, output io.Writer) error {
 	if err != nil {
 		return keyringStorageError(err)
 	}
-	request := []byte(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"portfolio-analyser-bridge","version":"0.4.1"}}}`)
+	request := []byte(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"portfolio-analyser-bridge","version":"0.4.2"}}}`)
 	responses, err := b.forward(ctx, token, request, "2025-06-18")
 	if err != nil {
 		return err
