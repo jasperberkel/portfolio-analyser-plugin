@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+os=$(uname -s)
+arch=$(uname -m)
+
+case "$os/$arch" in
+  Darwin/arm64) binary="$script_dir/native/darwin-arm64/portfolio-analyser-bridge" ;;
+  Darwin/x86_64) binary="$script_dir/native/darwin-amd64/portfolio-analyser-bridge" ;;
+  Linux/aarch64|Linux/arm64) binary="$script_dir/native/linux-arm64/portfolio-analyser-bridge" ;;
+  Linux/x86_64|Linux/amd64) binary="$script_dir/native/linux-amd64/portfolio-analyser-bridge" ;;
+  *)
+    echo "Portfolio Analyser does not support this platform: $os/$arch" >&2
+    exit 1
+    ;;
+esac
+
+exec "$binary" "$@"

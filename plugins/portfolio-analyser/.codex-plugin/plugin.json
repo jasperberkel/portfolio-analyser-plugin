@@ -1,7 +1,7 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.3.0",
-  "description": "Import portfolios, research positions and market opportunities, create briefings, and configure recurring jobs.",
+  "version": "0.4.0",
+  "description": "Securely connect Portfolio Analyser, import portfolios, run research and briefings, and configure recurring jobs.",
   "author": {
     "name": "Jasper Berkel",
     "url": "https://github.com/jasperberkel"
@@ -10,10 +10,11 @@
   "repository": "https://github.com/jasperberkel/portfolio-analyser-plugin",
   "keywords": ["portfolio", "investing", "research", "markets"],
   "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Portfolio Analyser",
     "shortDescription": "Portfolio research, briefings, and schedules",
-    "longDescription": "Connect Codex to Portfolio Analyser workflows for importing holdings, researching positions and opportunities, publishing briefings, and scheduling recurring runs.",
+    "longDescription": "Securely connect Codex to the local Portfolio Analyser, import holdings, publish research and briefings, and schedule recurring runs.",
     "developerName": "Jasper Berkel",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],

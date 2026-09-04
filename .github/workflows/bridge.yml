@@ -1,0 +1,27 @@
+name: Bridge
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: plugins/portfolio-analyser/src/bridge
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: plugins/portfolio-analyser/src/bridge/go.mod
+          cache-dependency-path: plugins/portfolio-analyser/src/bridge/go.sum
+      - run: go test ./...
+      - name: Rebuild bundled binaries
+        run: ../../../../scripts/build-bridge.sh
+      - name: Verify generated artifacts
+        run: git diff --exit-code -- ../../bin ../../checksums.txt

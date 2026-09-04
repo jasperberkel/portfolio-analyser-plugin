@@ -9,8 +9,8 @@
     {
       "name": "portfolio-analyser",
       "source": "./plugins/portfolio-analyser",
-      "description": "Portfolio import, research, briefings, and recurring schedule setup.",
-      "version": "0.3.0",
+      "description": "Secure local connection, portfolio import, research, briefings, and recurring schedule setup.",
+      "version": "0.4.0",
       "author": {
         "name": "Jasper Berkel"
       },

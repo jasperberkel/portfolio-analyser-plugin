@@ -1,11 +1,11 @@
 ---
 name: portfolio-analyser-setup
-description: Prepare the installed Portfolio Analyser plugin and configure recurring jobs for all of its research and briefing skills. Use when the user asks to set up, prepare, schedule, or automate the plugin in Codex or Claude Code; do not use to run reports immediately or install the app itself.
+description: Securely connect the installed Portfolio Analyser plugin to the local app and configure recurring jobs for all research and briefing skills. Use when the user asks to set up, connect, prepare, schedule, or automate the plugin in Codex or Claude Code; do not use to run reports immediately or install the app itself.
 ---
 
 # Portfolio Analyser Setup
 
-Prepare the installed plugin and configure recurring jobs without creating duplicates.
+Pair the installed plugin with the local app, verify MCP, and configure recurring jobs without creating duplicates. Plugin installation alone is never authorization to pair or create schedules.
 
 ## Detect the host
 
@@ -15,7 +15,23 @@ Determine the current host from the product context and available scheduling too
 - For Claude Code, read [references/claude-code.md](references/claude-code.md).
 - If neither environment can be identified, explain that the supported targets are Codex and Claude Code and ask which one the user is using.
 
-Verify that the `portfolio_analyser` MCP tools are configured. If they are not, warn that scheduled runs require the local Portfolio Analyser app and MCP server to be available, but continue the schedule setup when the user wants to proceed.
+## Connect the local app
+
+Locate the installed plugin root from this skill's path. The bridge executable is:
+
+- macOS or Linux: `<plugin-root>/bin/portfolio-analyser-bridge`
+- Windows: `<plugin-root>\bin\portfolio-analyser-bridge.exe`
+
+Run the bridge's `status` command first. Never print, inspect, request, or persist the long-lived token yourself.
+
+- If status succeeds, continue to schedule discovery without pairing again.
+- If the app is unreachable, ask the user to start Portfolio Analyser and stop. Do not create schedules that cannot reach their dependency.
+- If no credential exists or it was revoked, tell the user to open `http://localhost:3000/settings`, choose **Verbindungscode erzeugen**, and paste the short-lived code into the conversation.
+- On Linux, if the bridge reports that no secure keyring is available, relay its Secret Service guidance and stop. Never fall back to a plaintext file.
+
+After the user supplies a code, detect the current client name and operating system. Run `pair` with `--client` and `--platform`, passing the code only on the process's standard input. The bridge stores the returned token directly in the native credential store. Do not include the code in command-line arguments, logs, summaries, or saved jobs.
+
+Run `status` again. Continue only when it confirms an authenticated MCP handshake. If the host has already started the plugin MCP process without a credential, explain at the end that a plugin reload or new session may be required before tools appear; this does not prevent schedule configuration after the direct status check succeeds.
 
 ## Discover schedulable skills
 

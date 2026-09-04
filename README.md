@@ -7,12 +7,13 @@ Cross-platform plugin marketplace for Codex and Claude Code. It bundles the Port
 - `portfolio-import`: import and synchronize portfolio documents
 - `portfolio-position-research`: research current portfolio positions
 - `market-opportunity-research`: research non-personalized market opportunities
+- `finanzen-news-research`: read finanzen.net news and publish a sourced German report through MCP
 - `portfolio-briefing`: turn the current portfolio and reports into actionable recommendations
 - `portfolio-analyser-setup`: discover and configure recurring research and briefing jobs for Codex or Claude Code
 
 ## Prerequisite
 
-The skills expect the [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application and its `portfolio_analyser` MCP server to be running and configured. The scheduling skill configures jobs but does not install or start the application.
+The skills expect the local [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application to be running. The plugin includes its MCP bridge and secure pairing flow; no environment token is needed.
 
 ## Install in Codex
 
@@ -37,19 +38,35 @@ In Claude Code, skills are available under the plugin namespace, for example:
 /portfolio-analyser:portfolio-import
 /portfolio-analyser:portfolio-position-research
 /portfolio-analyser:market-opportunity-research
+/portfolio-analyser:finanzen-news-research
 /portfolio-analyser:portfolio-briefing
 /portfolio-analyser:portfolio-analyser-setup
 ```
 
-## Configure recurring jobs
+## Create a news report
+
+For a news report on demand, ask:
+
+```text
+Use $finanzen-news-research to summarize the latest finanzen.net news
+and upload the German report to Portfolio Analyser.
+```
+
+The news skill defaults to the last 24 hours and stores reports as `news.finanzen-net`, without requiring portfolio holdings. It verifies the saved report through MCP after publication.
+
+## Secure setup and recurring jobs
 
 After installation, ask Codex or Claude Code:
 
 ```text
-Set up the recurring Portfolio Analyser research and briefing jobs.
+Set up Portfolio Analyser and its recurring research and briefing jobs.
 ```
 
-The setup skill detects the host and dynamically discovers all plugin skills ending in `-research` or `-briefing`. It checks existing schedules before making changes, then proposes research jobs daily at 10:00 and briefing jobs daily at 11:00. Future skills using either suffix are included automatically.
+The setup skill first asks you to generate a five-minute, single-use code under `http://localhost:3000/settings`. Its bundled helper exchanges that code and stores the permanent credential in macOS Keychain, Windows Credential Manager, or Linux Secret Service. The token is never shown in the app or conversation.
+
+After a successful MCP handshake, the skill dynamically discovers all plugin skills ending in `-research` or `-briefing`. It checks existing schedules before making changes, then proposes research jobs daily at 10:00 and briefing jobs daily at 11:00. Future skills using either suffix are included automatically.
+
+Linux requires an installed and unlocked Secret Service such as GNOME Keyring. The setup fails safely instead of writing credentials to a plaintext file.
 
 ## Ask an agent to install it
 
@@ -69,5 +86,7 @@ and install its portfolio-analyser plugin.
 plugins/portfolio-analyser/
   .codex-plugin/plugin.json               Codex manifest
   .claude-plugin/plugin.json              Claude Code manifest
+  .mcp.json                               Shared local MCP bridge
+  bin/                                    Bundled platform binaries
   skills/                                 Shared Agent Skills
 ```
