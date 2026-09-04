@@ -1,6 +1,6 @@
 module github.com/jasperberkel/portfolio-analyser-plugin/bridge
 
-go 1.23.0
+go 1.23.12
 
 require github.com/zalando/go-keyring v0.2.8
 
