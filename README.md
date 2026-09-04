@@ -86,7 +86,8 @@ and install its portfolio-analyser plugin.
 plugins/portfolio-analyser/
   .codex-plugin/plugin.json               Codex manifest
   .claude-plugin/plugin.json              Claude Code manifest
-  .mcp.json                               Shared local MCP bridge
+  .mcp.json                               Codex MCP descriptor
+  .claude-plugin/plugin.json              Claude MCP descriptor and manifest
   bin/                                    Bundled platform binaries
   skills/                                 Shared Agent Skills
 ```

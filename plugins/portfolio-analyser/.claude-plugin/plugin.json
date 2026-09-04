@@ -1,6 +1,6 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Securely connect Portfolio Analyser, import portfolios, run research and briefings, and configure recurring jobs.",
   "author": {
     "name": "Jasper Berkel",
@@ -10,5 +10,10 @@
   "repository": "https://github.com/jasperberkel/portfolio-analyser-plugin",
   "keywords": ["portfolio", "investing", "research", "markets"],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json"
+  "mcpServers": {
+    "portfolio_analyser": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/portfolio-analyser-bridge",
+      "args": ["mcp"]
+    }
+  }
 }
