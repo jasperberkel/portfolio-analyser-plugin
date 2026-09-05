@@ -1,28 +1,36 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.6.0",
-  "description": "Securely connect Portfolio Analyser, import portfolios, run research and briefings, and configure recurring jobs.",
+  "version": "0.7.0",
+  "description": "Coordinate parallel research and portfolio strategy, import portfolios, and schedule complete analysis runs.",
   "author": {
     "name": "Jasper Berkel",
     "url": "https://github.com/jasperberkel"
   },
   "homepage": "https://github.com/jasperberkel/portfolio-analyser-plugin",
   "repository": "https://github.com/jasperberkel/portfolio-analyser-plugin",
-  "keywords": ["portfolio", "investing", "research", "markets"],
+  "keywords": [
+    "portfolio",
+    "investing",
+    "research",
+    "markets"
+  ],
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Portfolio Analyser",
-    "shortDescription": "Portfolio research, briefings, and schedules",
-    "longDescription": "Securely connect Codex to the local Portfolio Analyser, import holdings, publish research and briefings, and schedule recurring runs.",
+    "shortDescription": "Parallel research and portfolio strategy",
+    "longDescription": "Run parallel research, maintain a long-term portfolio strategy, and publish complete analyses atomically.",
     "developerName": "Jasper Berkel",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "websiteURL": "https://github.com/jasperberkel/portfolio-analyser-plugin",
     "defaultPrompt": [
+      "Run a complete portfolio analysis with $run-analysis.",
       "Import my portfolio documents into Portfolio Analyser.",
-      "Research all current positions in my portfolio.",
-      "Set up recurring jobs for all Portfolio Analyser research and briefing skills."
+      "Set up a daily Portfolio Analyser analysis run."
     ]
   }
 }

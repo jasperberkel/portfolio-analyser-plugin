@@ -1,0 +1,13 @@
+interface:
+  display_name: "Run Analysis"
+  short_description: "Research parallel ausführen und Portfolio-Strategie veröffentlichen"
+  default_prompt: "Use $run-analysis to complete parallel research, portfolio strategy and atomic publication to Portfolio Analyser."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "portfolio_analyser"
+      description: "Kontext und atomare Veröffentlichung vollständiger Analyse-Läufe"
+      transport: "streamable_http"
+      url: "http://127.0.0.1:8010/mcp"
+policy:
+  allow_implicit_invocation: true

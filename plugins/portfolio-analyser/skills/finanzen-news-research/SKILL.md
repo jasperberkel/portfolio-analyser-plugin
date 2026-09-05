@@ -1,6 +1,6 @@
 ---
 name: finanzen-news-research
-description: Read current finanzen.net news, create a sourced German market-news report, and publish it to the local Portfolio Analyser through MCP. Use for finanzen.net news scans and news reports; do not use for portfolio recommendations or broad investment-opportunity screens.
+description: Read current finanzen.net news, create a sourced German market-news report, as a draft for the Portfolio Analyser. Use for finanzen.net news scans and news reports; do not use for portfolio recommendations or broad investment-opportunity screens.
 ---
 
 # finanzen.net News Research
@@ -40,8 +40,6 @@ Place ordinary Markdown source links beside the claims they support, including a
 
 Include tickers or ISINs only when verified and useful. Price moves need an observation time, currency or unit, and comparison basis; do not present article-time prices as live quotes. Describe market implications conditionally, without turning the report into personalized buy/sell instructions or unsupported price targets. Explicitly identify news-only evidence: one headline, investigation, analyst view, or ordinary daily price move is not by itself a portfolio trade trigger. Name prompt review only when a verified event and its consequences justify it; keep review urgency separate from trade execution.
 
-## Publish and confirm
+## Return the draft
 
-Read [references/mcp-contract.md](references/mcp-contract.md). Once the complete report is ready, publish it through `publish_analysis` using the stable analysis type `news.finanzen-net`, then verify the stored report with `get_analysis`.
-
-Invoking this skill authorizes publication to the local app unless the user explicitly requests a draft or conversation-only report. Follow the contract's bounded retry behavior. If publication is unavailable, preserve the completed report in the conversation or a local Markdown file and state that upload did not complete. End with a short result including the report period and confirmed report UUID; distinguish a confirmed write from a failed read-back check.
+Read [the shared draft contract](../../references/draft-contract.md). Return the complete report with its exact news window and coverage limitations. Never access Portfolio Analyser MCP, publish, or invoke run-analysis yourself. Use supplied run/report IDs when orchestrated. Publication and read-back are the orchestrator's responsibility.

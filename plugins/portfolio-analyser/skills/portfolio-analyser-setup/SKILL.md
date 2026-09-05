@@ -1,6 +1,6 @@
 ---
 name: portfolio-analyser-setup
-description: Securely connect the installed Portfolio Analyser plugin to the local app and configure recurring jobs for all research and briefing skills. Use when the user asks to set up, connect, prepare, schedule, or automate the plugin in Codex or Claude Code; do not use to run reports immediately or install the app itself.
+description: Securely connect the installed Portfolio Analyser plugin to the local app and configure one recurring run-analysis job and shared agent profiles. Use when the user asks to set up, connect, prepare, schedule, or automate the plugin in Codex or Claude Code; do not use to run reports immediately or install the app itself.
 ---
 
 # Portfolio Analyser Setup
@@ -33,63 +33,37 @@ After the user supplies a code, detect the current client name and operating sys
 
 Run `status` again. Continue only when it confirms an authenticated MCP handshake. If the host has already started the plugin MCP process without a credential, explain at the end that a plugin reload or new session may be required before tools appear; this does not prevent schedule configuration after the direct status check succeeds.
 
-## Discover schedulable skills
+## Verify workflow and install profiles
 
-Inspect the skills bundled in the installed `portfolio-analyser` plugin. Prefer the host's installed-plugin inventory; otherwise inspect the plugin's `skills/` directory and read each skill's frontmatter `name`.
+Resolve `<plugin-root>/scripts/workflow.py` and run its discover command. Require run-analysis plus one strategy and the registered research descriptors; never infer jobs from name suffixes. Verify get_analysis_context, prepare_strategy_context and publish_analysis_run are available on the connected server. Old app versions must be updated before scheduling.
 
-Build the target set dynamically:
-
-- Every skill name ending exactly in `-research` is a research job. Propose daily at 10:00.
-- Every skill name ending exactly in `-briefing` is a briefing job. Propose daily at 11:00.
-
-Do not hard-code the current skill names. Sort each group lexicographically so the proposal and result are deterministic. If no matching skills are installed, report that and create nothing.
-
-For every target skill named `<skill-name>`, use these stable identifiers:
-
-- Canonical prompt marker: `[portfolio-analyser:<skill-name>]`
-- Display name: `Portfolio Analyser - <skill-name>`
-
-Always include the canonical marker in the saved prompt, even when the scheduler has a separate name field.
+For Codex, run `python3 <plugin-root>/scripts/install_agent_profiles.py <project-root>` to install/update only the two managed project profiles. Do not overwrite an unmanaged collision. Claude Code uses the plugin's bundled agents. Read [host adapters](../../references/agent-adapters.md) and disclose the instruction-based fallback when native profile selection is unavailable. Agent setup is part of an explicitly requested workflow setup, not a side effect of plugin installation.
 
 ## Inspect existing jobs
 
-List existing scheduled jobs before asking for confirmation or writing changes. Match a job to a target skill in this order:
+Use the host scheduling tool and inspect saved jobs first. The single target is:
 
-1. Its prompt contains the exact canonical marker.
-2. Its prompt explicitly invokes the exact target skill.
-3. Its name exactly equals the stable display name.
-4. For migration only, recognize these legacy names:
-   - `Portfolio Analyser - Position Research` → `portfolio-position-research`
-   - `Portfolio Analyser - Market Opportunities` → `market-opportunity-research`
-   - `Portfolio Analyser - Briefing` → `portfolio-briefing`
+- Skill: run-analysis
+- Canonical prompt marker: `[portfolio-analyser:run-analysis]`
+- Display name: `Portfolio Analyser - run-analysis`
 
-Never match on a vague phrase such as `research` or `briefing`. Preserve unrelated jobs.
+Match an existing target by exact canonical marker, exact skill invocation or exact display name. Reuse one unambiguous match; do not create a duplicate. Ask which to keep if multiple target jobs match.
 
-- No match: mark the target as new.
-- One match: reuse and update that job after confirmation.
-- More than one match: do not create another job. Report the duplicates and ask which one to keep before deleting or consolidating anything. Never delete a job without explicit confirmation.
+For migration, identify only exact legacy markers or skill invocations for finanzen-news-research, market-opportunity-research, portfolio-position-research, portfolio-briefing and portfolio-strategy, or their exact `Portfolio Analyser - <skill>` names. Also recognize the legacy display names `Portfolio Analyser - Position Research`, `Portfolio Analyser - Market Opportunities`, and `Portfolio Analyser - Briefing`. Preserve unrelated jobs and notification preferences. Do not match vague research/briefing text.
 
-## Confirm the schedule
+## Verify and migrate the schedule
 
-Present every discovered skill with its proposed cadence, local wall-clock time, detected timezone, and whether its job is new or existing. Ask once whether the user accepts the proposal or wants different frequencies, times, or timezone.
+Default proposal: one complete daily run at 10:00 in the user's detected timezone. Show cadence, timezone, new/existing target and exact legacy jobs to pause. Obtain the user's schedule preference only when it has not already been provided. Plugin installation alone does not authorize schedule creation or changes.
 
-Default proposal:
+Before switching existing jobs, require a successful complete manual run using the updated app/plugin, confirmed through stored strategy, research and exact plan associations. Fixture tests do not count as a live acceptance run. If it fails, report the stage and preserve the existing automation configuration.
 
-- All `*-research` skills: daily at 10:00
-- All `*-briefing` skills: daily at 11:00
-- Timezone: the user's detected local timezone
+After successful acceptance, create/update the target, preserving applicable notification choices, and pause the identified legacy jobs without deleting them. Avoid an active overlap during the switch: prepare the new target paused, pause legacy jobs, then activate the target. If a scheduler mutation fails, read back actual states and restore the pre-switch configuration where possible; never report a completed migration without verifying it. Do not modify unrelated jobs.
 
-The later briefing time intentionally gives research jobs time to finish. Wait for the answer. Plugin installation alone is not authorization to create scheduled jobs. If the user already supplied all schedule values, summarize them and continue without asking the same question again.
-
-## Create or update jobs
-
-After confirmation, update the single matching job for each target skill and create only missing jobs. Use the platform-specific explicit invocation described in the relevant reference file.
-
-Derive each prompt from this template:
+Use the host-specific explicit invocation with this prompt:
 
 ```text
-[portfolio-analyser:<skill-name>]
-Run the installed <skill-name> skill exactly as defined and complete its full workflow. If a required dependency, the Portfolio Analyser app, or its MCP server is unavailable, report the failure and do not fabricate results or publication.
+[portfolio-analyser:run-analysis]
+Run the installed run-analysis skill exactly as defined: load app context, execute registered research in parallel subagents, create portfolio strategy, and publish the complete package atomically. If a required dependency, researcher or publication step fails, preserve drafts and report the failure without publishing a partial package. If the identical daily context already has a successful run, stay quiet. Notify only on a newly completed analysis, a failure, or required user action.
 ```
 
-Use the confirmed recurrence and timezone. Do not modify jobs unrelated to this plugin. Afterward, report every effective schedule, its timezone, whether it was created or updated, the scheduler type, and any host-specific limitation.
+Save the confirmed recurrence and timezone. Report the effective single schedule, paused legacy jobs, scheduler type and any host limitation. Do not claim profile isolation on a host that only uses role instructions.

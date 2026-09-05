@@ -10,13 +10,18 @@
       "name": "portfolio-analyser",
       "source": "./plugins/portfolio-analyser",
       "description": "Secure local connection, portfolio import, research, briefings, and recurring schedule setup.",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "author": {
         "name": "Jasper Berkel"
       },
       "homepage": "https://github.com/jasperberkel/portfolio-analyser-plugin",
       "repository": "https://github.com/jasperberkel/portfolio-analyser-plugin",
-      "keywords": ["portfolio", "investing", "research", "markets"],
+      "keywords": [
+        "portfolio",
+        "investing",
+        "research",
+        "markets"
+      ],
       "category": "Productivity"
     }
   ]

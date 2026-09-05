@@ -1,6 +1,6 @@
 interface:
   display_name: "Portfolio Analyser Setup"
   short_description: "App sicher verbinden und Schedules einrichten"
-  default_prompt: "Use $portfolio-analyser-setup to securely connect Portfolio Analyser and configure recurring research and briefing jobs."
+  default_prompt: "Use $portfolio-analyser-setup to securely connect Portfolio Analyser and configure the Research-Agent and Strategy-Agent profiles and one recurring run-analysis job."
 policy:
   allow_implicit_invocation: true

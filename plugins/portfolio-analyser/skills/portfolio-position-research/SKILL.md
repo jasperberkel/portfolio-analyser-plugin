@@ -1,15 +1,15 @@
 ---
 name: portfolio-position-research
-description: Research all current portfolio positions by default, or an explicitly selected subset, using the local Portfolio Analyser and current sources. Publish comparable health, valuation, thesis-change, and risk evidence in German; do not use without a portfolio in the app.
+description: Research all current portfolio positions by default, or an explicitly selected subset, using supplied holdings and current sources. Draft comparable health, valuation, thesis-change, and risk evidence in German; requires supplied portfolio data.
 ---
 
 # Portfolio Position Research
 
-Research the current portfolio and produce one current, evidence-based German report in the local Portfolio Analyser app. Cover every position unless the user explicitly selects a subset.
+Research the current portfolio and produce one current, evidence-based German report from supplied portfolio data. Cover every position unless the user explicitly selects a subset.
 
 ## Select positions
 
-1. Read [references/mcp-contract.md](references/mcp-contract.md), then call `get_current_positions`. Stop if the app has no snapshot or positions.
+1. Read [the shared draft contract](../../references/draft-contract.md). Use supplied `current_portfolio`; stop and name missing data when the snapshot or required position list is absent (an explicitly empty list is valid for a cash-only portfolio). Never use Portfolio Analyser MCP or invoke run-analysis yourself.
 2. Resolve the selector from the invoking prompt:
    - no selector: every position;
    - `alle` / `all`: every position;
@@ -18,7 +18,9 @@ Research the current portfolio and produce one current, evidence-based German re
    - names, ISINs, or symbols: exactly those positions.
 3. Compare market values as decimals. For equal values, sort by ISIN, symbol, then name. Match explicit identifiers before names; require an unambiguous name match. Ask only when an explicit selector is ambiguous or absent from the current portfolio.
 4. Record the snapshot date, portfolio total, selected market values, and each selected position's portfolio weight. Never substitute a different position silently.
-5. Read the latest previous position-research report when available, following the MCP contract, to distinguish new evidence from an unchanged thesis. A missing comparison is not evidence of no change.
+5. Read the supplied `previous_report` when available, to distinguish new evidence from an unchanged thesis. A missing comparison is not evidence of no change.
+
+For a cash-only portfolio, state that no instruments are held, record the snapshot cash and return complete zero-position coverage. Do not invent holdings to research.
 
 ## Research current evidence
 
@@ -36,7 +38,7 @@ Distinguish:
 
 Do not treat price momentum as business health, issue buy/sell orders, promise returns, or present the report as suitability advice.
 
-## Report and publish
+## Report and return
 
 Write one self-contained German Markdown report. Include the selector, snapshot date, research cutoff, source links, a concise portfolio-level synthesis, and a section for every selected position. Explicitly answer:
 
@@ -50,4 +52,4 @@ End with a compact cross-position synthesis of common risks, relevant alternativ
 
 Before publication, check the completed report against the selected snapshot identifiers: every selected position must appear once in its own section heading with its ISIN, symbol, or unambiguous name. Include a short coverage checklist with selected/researched/uncovered counts and any uncovered identifiers. An all-positions report is complete only when every selected position has current-source research; unavailable evidence must be an explicit gap, not an omitted position.
 
-Generate one analysis UUID and call `publish_analysis` exactly once with analysis type `portfolio.position-research` after the complete report is ready. Invoking this skill authorizes publication to the local app unless the user explicitly asks for a conversation-only report. Retry a transport-uncertain publish at most once with the same UUID and identical content.
+Return the complete draft using the shared contract. In orchestrated runs cover all supplied positions and copy `run_id`, `report_id` and `snapshot_id` from the task. Single invocations may use an explicit subset, but still return only a draft. Publication is the orchestrator's responsibility.

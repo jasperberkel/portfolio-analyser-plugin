@@ -1,0 +1,7 @@
+{
+  "contract_version": 1,
+  "skill": "finanzen-news-research",
+  "stage": "research",
+  "requires": [],
+  "produces": "news.finanzen-net"
+}

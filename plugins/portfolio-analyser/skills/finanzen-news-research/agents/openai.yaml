@@ -1,13 +1,6 @@
 interface:
   display_name: "finanzen.net News Research"
   short_description: "finanzen.net-News als Bericht in der App speichern"
-  default_prompt: "Use $finanzen-news-research to publish a sourced German news report, distinguishing lasting material developments from short-term headlines without trade instructions."
-dependencies:
-  tools:
-    - type: "mcp"
-      value: "portfolio_analyser"
-      description: "Lokale Portfolio-App zum Speichern und Prüfen vollständiger Nachrichtenberichte"
-      transport: "streamable_http"
-      url: "http://127.0.0.1:8010/mcp"
+  default_prompt: "Use $finanzen-news-research to create a German draft from the supplied inputs; do not access the Portfolio Analyser app."
 policy:
   allow_implicit_invocation: true

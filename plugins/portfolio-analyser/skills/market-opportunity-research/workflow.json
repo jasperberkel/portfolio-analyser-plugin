@@ -1,0 +1,9 @@
+{
+  "contract_version": 1,
+  "skill": "market-opportunity-research",
+  "stage": "research",
+  "requires": [
+    "previous_report"
+  ],
+  "produces": "market.opportunity-research"
+}

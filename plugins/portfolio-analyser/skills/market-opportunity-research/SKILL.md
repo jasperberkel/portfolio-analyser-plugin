@@ -1,6 +1,6 @@
 ---
 name: market-opportunity-research
-description: Research current non-personalized market opportunities across listed stocks, retail-accessible ETFs and ETCs, major crypto assets, and commodities, then publish a sourced German watchlist report to the local Portfolio Analyser. Use for general investment ideas and market screens; do not inspect or tailor conclusions to the user's portfolio.
+description: Research current non-personalized market opportunities across listed stocks, retail-accessible ETFs and ETCs, major crypto assets, and commodities, then draft a sourced German watchlist report. Use for general investment ideas and market screens; do not inspect or tailor conclusions to the user's portfolio.
 ---
 
 # Market Opportunity Research
@@ -22,7 +22,7 @@ Do not call `get_current_positions` or otherwise personalize the scan from portf
 
 ## Discover and verify candidates
 
-Read [references/research-rubric.md](references/research-rubric.md). Always browse using the invocation date as the research cutoff. Read the latest previous market report when available, following [references/mcp-contract.md](references/mcp-contract.md), to distinguish changed evidence from a repeated thesis; no prior report is a comparison gap, not proof of no change.
+Read [references/research-rubric.md](references/research-rubric.md). Always browse using the invocation date as the research cutoff. Read [the shared draft contract](../../references/draft-contract.md) and the supplied `previous_report` when available, to distinguish changed evidence from a repeated thesis; no prior report is a comparison gap, not proof of no change.
 
 Start with a broad evidence scan before choosing candidates. Identify current macro, industry, regulatory, supply/demand, technology, and capital-market developments. Then verify every shortlisted instrument independently.
 
@@ -55,8 +55,6 @@ Write one self-contained German Markdown report with inline source links. Includ
 
 Separate observable facts, interpretation, and conditional scenarios. Use base, upside, and downside cases. Do not issue buy/sell orders, promise returns, imply that a candidate is suitable for the user, or use unsupported price targets. “Interessant” means worthy of further research, not a recommendation. Explicitly distinguish watch-only ideas from any evidence of current price attractiveness; a watchlist place or positive business outlook must not become a downstream purchase signal by itself. Separately state whether the evidence supports comparing a structural role (for example broad exposure or short-duration liquidity), even without an underpricing thesis. Name any unresolved blocker as a research gap, not an assignment to the user or proof that the investment is bad.
 
-## Publish
+## Return the draft
 
-Read [references/mcp-contract.md](references/mcp-contract.md). Generate one analysis UUID and call `publish_analysis` exactly once with analysis type `market.opportunity-research` after the complete report is ready.
-
-Invoking this skill authorizes publication to the local app unless the user explicitly asks for a conversation-only report. Retry a transport-uncertain publish at most once with the same UUID and identical content. Never create or modify a portfolio snapshot.
+Return the complete report using the shared draft contract. Never access Portfolio Analyser MCP, publish, or invoke run-analysis yourself. Use the supplied run/report IDs in orchestrated runs. A missing prior report is an explicit comparison gap and does not prevent fresh research.

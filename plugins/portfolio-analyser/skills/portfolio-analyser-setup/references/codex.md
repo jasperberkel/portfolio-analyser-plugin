@@ -1,12 +1,7 @@
 # Codex scheduling
 
-Use Codex scheduled-task or automation tools when they are available.
+Use the available automation_update tool and its actual schema. Use standalone local cron only when the user explicitly requests one job per complete run; otherwise follow the host's heartbeat default. The requested migration from separate research jobs to a single independent daily analysis authorizes the standalone local job here.
 
-1. Prefer standalone scheduled tasks rather than chat heartbeats because every skill run should be independent.
-2. Resolve the saved Portfolio Analyser project that corresponds to the current checkout. Run each task locally in that project so it can reach the loopback app and the plugin-provided MCP bridge. Do not choose an unrelated project or invent a project identifier.
-3. List existing scheduled tasks and apply the matching and duplicate rules from `SKILL.md` before making changes.
-4. Put the canonical marker in every prompt and explicitly invoke the skill as `$<skill-name>` so a scheduled run uses the installed skill.
-5. Translate the confirmed cadence, time, and timezone into the scheduler's supported recurrence format. Keep tasks active and use the current/default model settings unless the user requested overrides.
-6. Do not display raw recurrence syntax unless the user asks for it.
+Resolve the saved Portfolio Analyser project using list_projects. Existing automation files can be inspected read-only for IDs and full fields. Preserve the current model, reasoning and notification settings unless explicitly overridden. Migration target: one explicit `$run-analysis` invocation with its canonical marker. Never write automation TOML manually or use operating-system cron as a substitute.
 
-Codex CLI and the IDE extension do not provide the Scheduled management interface. If the current Codex surface has no scheduled-task creation tool, explain that the user must run this setup from ChatGPT/Codex desktop or web rather than silently substituting operating-system cron.
+Use the confirmed timezone and supported recurrence format; do not display raw recurrence syntax. Verify the installed plugin and a complete manual run before changing existing schedules. If scheduling tools are unavailable, give a short desktop handoff and do not claim the jobs changed.

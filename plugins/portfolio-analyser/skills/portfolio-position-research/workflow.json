@@ -1,0 +1,10 @@
+{
+  "contract_version": 1,
+  "skill": "portfolio-position-research",
+  "stage": "research",
+  "requires": [
+    "current_portfolio",
+    "previous_report"
+  ],
+  "produces": "portfolio.position-research"
+}
