@@ -5,15 +5,17 @@ Cross-platform plugin marketplace for Codex and Claude Code. It bundles the Port
 ## Included skills
 
 - `portfolio-import`: import and synchronize portfolio documents
-- `portfolio-position-research`: research current portfolio positions
-- `market-opportunity-research`: research non-personalized market opportunities
+- `portfolio-position-research`: research every current position by default, or an explicitly requested subset, with comparable health, valuation, and thesis-change evidence
+- `market-opportunity-research`: research up to eight non-personalized market opportunities without a minimum quota
 - `finanzen-news-research`: read finanzen.net news and publish a sourced German report through MCP
-- `portfolio-briefing`: turn the current portfolio and reports into actionable recommendations
+- `portfolio-briefing`: maintain a stable allocation plan with funded next steps, separate long-term goals, and user-confirmed progress
 - `portfolio-analyser-setup`: discover and configure recurring research and briefing jobs for Codex or Claude Code
 
 ## Prerequisite
 
 The skills expect the local [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application to be running. The plugin includes its MCP bridge and secure pairing flow; no environment token is needed.
+
+The updated briefing workflow requires app schema 3 (`portfolio-briefing/3`). Update the app alongside the plugin; the skill does not silently downgrade to older briefing formats. Confirming an action in the app records only a user assertion, never a broker execution or cash balance. Later statements drive revised follow-up recommendations; ordinary daily research does not automatically create another tranche.
 
 ## Install in Codex
 

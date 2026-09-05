@@ -15,6 +15,8 @@
 - Label management guidance, consensus estimates, and policy proposals as claims or forecasts.
 - State when data is stale, conflicting, unavailable, or distorted by one-off items.
 - Do not infer broker availability from general exchange listing. Confirm it directly or mark it unverified.
+- Date decision-driving facts by reporting period/event and prices by observation time, currency, and venue where available. A refreshed report timestamp does not refresh an old price.
+- Identify material changes versus the previous report when available; if unavailable, say so. A repeated catalyst is not automatically a new opportunity.
 
 ## Candidate assessment
 
@@ -28,8 +30,12 @@ For every candidate report:
 - **Upside driver:** one or more observable catalysts.
 - **Downside driver:** the main failure path.
 - **Invalidation:** a concrete event or metric that would undermine the thesis.
+- **Countercase:** the strongest evidence against the thesis and a reason not to act now.
+- **Change and urgency:** new evidence, unchanged thesis, or no comparison available; explain any urgency from a dated event rather than the publication of a new report.
 
 These labels summarize research quality and conditional prospects, not expected returns or suitability.
+
+Separate operating/protocol quality from valuation or price attractiveness. To claim current upside from mispricing, provide suitable dated valuation/supply-demand evidence and a meaningful comparison, not only issuer growth or a rising price. If the decisive evidence is unavailable, mark attractiveness unassessed and the upside thesis watch-only. Separately assess evidence for a structural role, using relevant holdings, product economics, duration, liquidity, and risks; a fund need not be mispriced to be useful in an allocation comparison. Neither label establishes personal suitability. Apply equivalent evidence standards to all candidates, regardless of whether a later reader already owns them. Do not force unlike assets into one valuation method. Confidence in verified historical results does not establish confidence in future returns.
 
 ## Asset-specific checks
 
@@ -44,6 +50,8 @@ Review index or objective, UCITS status where relevant, TER, assets, spread/liqu
 ### Crypto assets
 
 Review liquidity, protocol development, security incidents, decentralization, token economics, unlocks or issuance, real usage, custody, regulation, and major upgrades. Avoid tokens whose evidence is primarily community promotion. Crypto outlooks normally warrant high risk and lower confidence.
+
+Software releases alone do not establish adoption or investment potential. Use dated usage, liquidity, flow, issuance, or security evidence relevant to the actual thesis and name material gaps.
 
 ### Commodities
 
@@ -70,8 +78,8 @@ Use a concise ranked overview followed by one section per candidate:
 3. Latest facts and news.
 4. Valuation, structure, or supply/demand evidence appropriate to the asset.
 5. Base, upside, and downside cases.
-6. Verdict, tendency, confidence, risk, and invalidation.
+6. Verdict, tendency, claim-specific confidence, risk, strongest counterargument, and invalidation.
 7. Inline primary and independent sources.
+8. Material change versus the previous thesis and evidence-based urgency, including a reason against acting now.
 
-End with shared risks, monitoring dates or metrics, rejected themes, and a statement that the report is general research rather than personalized investment advice.
-
+Keep these checks compact, not eight repeated subheadings. End with shared risks, monitoring dates or metrics, rejected themes, and a statement that the report is general research rather than personalized investment advice. Several names exposed to the same catalyst are not independent opportunities; name that overlap instead of filling the shortlist quota.

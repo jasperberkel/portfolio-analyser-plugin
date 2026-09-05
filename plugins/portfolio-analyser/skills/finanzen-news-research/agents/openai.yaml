@@ -1,7 +1,7 @@
 interface:
   display_name: "finanzen.net News Research"
   short_description: "finanzen.net-News als Bericht in der App speichern"
-  default_prompt: "Use $finanzen-news-research to read the latest finanzen.net news, create a sourced German report, and publish it to Portfolio Analyser through MCP."
+  default_prompt: "Use $finanzen-news-research to publish a sourced German news report, distinguishing lasting material developments from short-term headlines without trade instructions."
 dependencies:
   tools:
     - type: "mcp"

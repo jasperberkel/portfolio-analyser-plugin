@@ -21,6 +21,8 @@ Open the selected articles and capture their direct URLs, titles, publication/up
 
 Consolidate duplicate coverage and repeated intraday updates into one development, using the latest substantive version available at the cutoff. Exclude advertisements, advertorials, affiliate promotions, and automated historical-return articles without a new material event. Attribute agency reporting, company releases, analyst opinions, and unconfirmed claims explicitly. Repetition of the same agency story is not independent confirmation.
 
+Distinguish a potentially persistent change to earnings, financing, regulation, or instrument structure from a transient headline or price reaction. State what is actually new, the mechanism that could matter, the strongest relevant counterinterpretation, and whether follow-up evidence is needed. A new article about an old risk does not itself create urgency. Do not invent a durable effect where only a short-term reaction is observable.
+
 Keep finanzen.net as the news source. Follow primary sources such as company releases, filings, central banks, or statistical agencies to verify material figures or resolve consequential uncertainty; cite these as supplementary evidence. Summarize only accessible content in your own words, link to the articles, and separate reported facts from your interpretation. Do not infer an unread article's contents or copy full articles.
 
 If some articles cannot be read, continue with accessible evidence and describe the coverage gap. If access failures or unverifiable dates prevent establishing current coverage, report that limitation without publishing an empty or fabricated news report. A successfully checked quiet period may produce a short report stating that no material developments were found in the checked coverage; do not claim that no news exists anywhere.
@@ -36,7 +38,7 @@ Use a concise German Markdown report with:
 
 Place ordinary Markdown source links beside the claims they support, including a direct finanzen.net article link for every development. Include the credited source and article timestamp when available. Do not leave tool-internal citation markers in the stored Markdown.
 
-Include tickers or ISINs only when verified and useful. Price moves need an observation time, currency or unit, and comparison basis; do not present article-time prices as live quotes. Describe market implications conditionally, without turning the report into personalized buy/sell instructions or unsupported price targets.
+Include tickers or ISINs only when verified and useful. Price moves need an observation time, currency or unit, and comparison basis; do not present article-time prices as live quotes. Describe market implications conditionally, without turning the report into personalized buy/sell instructions or unsupported price targets. Explicitly identify news-only evidence: one headline, investigation, analyst view, or ordinary daily price move is not by itself a portfolio trade trigger. Name prompt review only when a verified event and its consequences justify it; keep review urgency separate from trade execution.
 
 ## Publish and confirm
 

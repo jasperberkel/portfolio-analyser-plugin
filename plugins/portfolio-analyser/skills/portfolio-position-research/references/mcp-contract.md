@@ -33,6 +33,10 @@ Call `get_current_positions()`. It returns:
 
 Do not infer live prices from this response. The values belong to the snapshot date.
 
+## Read the comparison report
+
+Call `list_analyses(analysis_type="portfolio.position-research", limit=1)`. The result contains newest-first report metadata; if a report exists, load its full `content_markdown` with `get_analysis(id="<returned UUID>")`. Use it only as a comparison baseline, not as a replacement for current research. If no prior report exists or cannot be read, record the comparison gap and continue current research.
+
 ## Publish the completed report
 
 Call:
@@ -46,4 +50,3 @@ publish_analysis(
 ```
 
 Publish only after selection and research are complete. Never call `publish_portfolio_snapshot_and_analysis`: this skill does not modify positions or snapshots. A retry must reuse the same UUID and identical content; a conflicting UUID is a hard failure.
-

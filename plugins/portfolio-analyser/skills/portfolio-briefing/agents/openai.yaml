@@ -1,7 +1,7 @@
 interface:
   display_name: "Portfolio Briefing"
   short_description: "Konkrete Portfolioaktionen aus allen Berichten"
-  default_prompt: "Use $portfolio-briefing to create current evidence-linked portfolio recommendations."
+  default_prompt: "Use $portfolio-briefing to update my ongoing allocation plan and propose a few funded next steps with separate long-term goals."
 dependencies:
   tools:
     - type: "mcp"

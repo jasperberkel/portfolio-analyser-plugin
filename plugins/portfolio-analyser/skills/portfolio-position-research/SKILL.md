@@ -1,35 +1,38 @@
 ---
 name: portfolio-position-research
-description: Select current positions from the local Portfolio Analyser via MCP, research their latest health, outlook, risks, catalysts, and news online, and publish a sourced German report. Use for top, bottom, all, or explicitly named portfolio-position research; do not use without a portfolio in the app.
+description: Research all current portfolio positions by default, or an explicitly selected subset, using the local Portfolio Analyser and current sources. Publish comparable health, valuation, thesis-change, and risk evidence in German; do not use without a portfolio in the app.
 ---
 
 # Portfolio Position Research
 
-Research a user-selected subset of the current portfolio and produce one current, evidence-based German report in the local Portfolio Analyser app.
+Research the current portfolio and produce one current, evidence-based German report in the local Portfolio Analyser app. Cover every position unless the user explicitly selects a subset.
 
 ## Select positions
 
 1. Read [references/mcp-contract.md](references/mcp-contract.md), then call `get_current_positions`. Stop if the app has no snapshot or positions.
 2. Resolve the selector from the invoking prompt:
-   - no selector: the five largest positions;
+   - no selector: every position;
    - `alle` / `all`: every position;
    - `Top N` / `größte N`: the N highest market values;
    - `Bottom N` / `kleinste N`: the N lowest market values;
    - names, ISINs, or symbols: exactly those positions.
 3. Compare market values as decimals. For equal values, sort by ISIN, symbol, then name. Match explicit identifiers before names; require an unambiguous name match. Ask only when an explicit selector is ambiguous or absent from the current portfolio.
 4. Record the snapshot date, portfolio total, selected market values, and each selected position's portfolio weight. Never substitute a different position silently.
+5. Read the latest previous position-research report when available, following the MCP contract, to distinguish new evidence from an unchanged thesis. A missing comparison is not evidence of no change.
 
 ## Research current evidence
 
 Always browse for every selected position, even when a previous report exists. Use the invocation date as the research cutoff and the default outlook horizon of 6–12 months unless the user specifies another horizon.
 
-Read [references/research-rubric.md](references/research-rubric.md). Prefer dated issuer, fund-provider, exchange, filing, protocol-foundation, and regulator sources. Research the latest results or product facts plus material news, guidance, catalysts, and risks. If no material recent news exists, state that rather than filling the gap with speculation.
+Read [references/research-rubric.md](references/research-rubric.md). Apply the same decision-relevant checks to every selected position, including smaller positions; do not silently reduce an all-positions run to the largest holdings. Reuse shared sources and keep each section compact. If coverage cannot be completed, label the report partial and enumerate uncovered positions rather than treating them as healthy or held.
+
+Compare relevant holdings within common risk groups, such as BTC and ETH or overlapping US-tech shares and ETFs. Explain whether any difference rests on instrument evidence, portfolio concentration, or missing data; a larger holding is not automatically the worse investment. Explicit subset requests remain exact: name unresearched alternatives as gaps, without expanding the research silently.
 
 Distinguish:
 
 - **Fakten:** observable portfolio and source data;
-- **Einordnung:** what the evidence suggests about current health;
-- **Ausblick:** a conditional direction with confidence and upside/downside drivers.
+- **Einordnung:** operating/protocol health, distinct from dated valuation or price attractiveness;
+- **Ausblick:** conditional prospects, changes versus the prior thesis, counterevidence, and any evidence-based urgency.
 
 Do not treat price momentum as business health, issue buy/sell orders, promise returns, or present the report as suitability advice.
 
@@ -40,6 +43,11 @@ Write one self-contained German Markdown report. Include the selector, snapshot 
 - Was ist zuletzt passiert?
 - Wie robust, gemischt, angespannt oder spekulativ ist die Position aktuell, und warum?
 - Welche Faktoren könnten sie im gewählten Zeitraum stärken oder schwächen?
-- Ist die evidenzbasierte Tendenz eher positiv, gemischt oder negativ, und wie hoch ist die Konfidenz?
+- Was lässt sich über die aktuelle Bewertung sagen, was ist gegenüber dem Vorbericht neu, und welches Gegenargument spricht gegen eine Änderung?
+- Ist ein dringlicher neuer Befund belegt oder geht es nur um längerfristige Konzentration? Welche Evidenz fehlt?
+
+End with a compact cross-position synthesis of common risks, relevant alternatives, and research limits. Research does not choose allocation targets or trade sizes; an outlook horizon is not an execution deadline.
+
+Before publication, check the completed report against the selected snapshot identifiers: every selected position must appear once in its own section heading with its ISIN, symbol, or unambiguous name. Include a short coverage checklist with selected/researched/uncovered counts and any uncovered identifiers. An all-positions report is complete only when every selected position has current-source research; unavailable evidence must be an explicit gap, not an omitted position.
 
 Generate one analysis UUID and call `publish_analysis` exactly once with analysis type `portfolio.position-research` after the complete report is ready. Invoking this skill authorizes publication to the local app unless the user explicitly asks for a conversation-only report. Retry a transport-uncertain publish at most once with the same UUID and identical content.
