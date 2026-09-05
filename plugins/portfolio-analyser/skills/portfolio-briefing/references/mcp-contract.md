@@ -1,129 +1,60 @@
-# Portfolio Briefing MCP contract — schema 3
+# Portfolio Briefing MCP contract — schema 4
 
-Use the installed `portfolio_analyser` MCP connection. Transport names retain `dashboard`. An older server must be updated; do not silently downgrade.
+Use the installed `portfolio_analyser` MCP connection. An older server must be updated; never downgrade the publication format.
 
-## Read once
+## Default context
 
-`get_dashboard_context()` returns `snapshot` (including `id`, `as_of`, `base_currency`, `total_value`, `cash_value`), every `position` with deterministic `portfolio_weight_pct`, complete enabled `reports`, `excluded_reports`, `total_content_chars`, `source_fingerprint`, `existing_briefing_id`, and `plan` (null before the first V3 generation).
+`get_dashboard_context()` returns:
 
-Reports include `id`, `analysis_type`, `created_at`, `content_markdown`, and `max_age_days`. The fingerprint covers portfolio, report selection, and plan/confirmation state. Publication after an intervening change is rejected. Successful unchanged generations are discoverable via `existing_briefing_id`; publication itself does not make its result perpetually stale.
+- `snapshot`: current `id`, holdings `as_of`, `base_currency`, `total_value`, `cash_value`, `created_at`.
+- `positions`: all current positions with quantity, price, market value, identifiers and `portfolio_weight_pct`.
+- `reports`: complete latest enabled, nonexpired research with `id`, `analysis_type`, `created_at`, `content_markdown`, `max_age_days`.
+- `excluded_reports`: stale report metadata; not evidence.
+- `plan`: current immutable version, or null. Fields: `id` (version UUID), `plan_id` (stable plan UUID), `version`, `content_markdown`, `created_at`, `change_reason`, `migrated`.
+- `previous_briefing`: last successful report, or null. Includes `id`, `title`, `report_date`, `generated_at`, `schema_version`, `payload: {title, content_markdown}`, `portfolio_snapshot_id`, `snapshot_as_of`, `plan_version_id`, `source_analysis_ids`, `sources`, and generator/fingerprint metadata.
+- `previous_portfolio`: that report's original snapshot and complete positions, separate from current holdings; null without a previous report.
+- `report_date`: server date in Europe/Berlin. `source_fingerprint`: exact opaque publication input token. `review_state_version`: internal concurrency metadata, never a trade count. `total_content_chars`: loaded research, plan and prior report text size. `existing_briefing_id`: already successful review of this daily context, otherwise null.
 
-The plan contains:
+A new Berlin calendar day permits a review with unchanged holdings and research. Changed input data can permit another report on the same day. Publication itself never causes another required generation. The input/result fingerprint pair identifies the same successful review before and after its atomic state change. A failed publication leaves the last successful report visible. History is immutable.
 
-- `id`, `state_version`, `strategy`, `strategy_history`;
-- `reconciled_snapshot_id`, `reconciled_as_of`;
-- `actions`: stable records with `id`, `status` (`open`, `confirmed`, `superseded`, `resolved`), stored `action` (including `predecessor_id`), `portfolio_snapshot_id`, `snapshot_as_of`, `proposed_at`, `confirmed_at`, `confirmation_date`, `confirmation_history`, and optional `resolution_reason`. The server sets `proposed_at` once for a new action ID; carrying an action or confirming it never restarts its execution window. Older records may have no start timestamp. The stored confirmation date preserves its original local calendar day across later time-zone changes.
+## Optional history reads
 
-Confirmation history is user assertion, not execution data. Action snapshot IDs identify baselines, not enduring instruments.
+- `list_dashboard_briefings(limit=20, cursor=null)` → `{items, next_cursor}` with report metadata, no full Markdown.
+- `get_dashboard_briefing(id)` → full report and its exact `plan_version_id`.
+- `list_portfolio_plan_versions(limit=20, cursor=null)` → `{items, next_cursor}` with version metadata, no full Markdown.
+- `get_portfolio_plan_version(id)` → complete exact version.
 
-## Stable instrument identity
+Limits are 1–100. Pass `next_cursor` unchanged. Fetch a historical report's `plan_version_id` to see its actual associated plan; never substitute the current version. Migrated legacy reports may have no determinable association. Their text remains readable and is labelled historical.
 
-Prefer `ISIN:<UPPERCASE ISIN>`. Otherwise use `SYMBOL:<lowercase asset_type>:<UPPERCASE CURRENCY>:<UPPERCASE SYMBOL>`, for example `SYMBOL:crypto:EUR:ETH`. Cash is `CASH`. A bare symbol or a snapshot-specific position UUID cannot be a stable key. Do not merge ambiguous instruments. For symbol-only subjects include `asset_type` and `currency`; all supplied identifiers must agree. New instruments need included report evidence and a qualified key.
+Equivalent REST reads: `/api/v1/dashboard/briefings`, `/briefings/{id}`, `/plan/current`, `/plan/versions`, `/plan/versions/{id}` beneath `/api/v1/dashboard`; the existing `/api/v1/dashboard/briefing/current` returns `{briefing, plan, is_stale, stale_reasons}`. List endpoints accept `limit` and `cursor`. There is no confirmation endpoint.
 
-## Publish
+## Atomic publication
 
-Call `publish_dashboard_briefing` with:
-
-```text
-id = one caller-generated briefing UUID
-source_fingerprint = unchanged value from the context
-generator = "codex_skill"
-generator_version = "portfolio-briefing/3"
-schema_version = 3
-briefing = {summary, strategy, actions, plan}
-```
-
-`briefing.strategy` is the always-visible, plain-language strategic destination before the todos, not merely a list of quotas. `briefing.summary` explains why the current package takes precedence and why relevant new positions are selected or deferred. Keep deeper prioritization, candidate comparisons, assumptions, and calculations in `briefing.plan.strategy.rationale`; do not add unsupported payload fields. `briefing.plan` has:
+`publish_dashboard_briefing` accepts:
 
 ```json
 {
-  "expected_state_version": 0,
-  "strategy": {
-    "id": "strategy UUID; retained across revisions",
-    "revision": 1,
-    "time_zone": "Europe/Berlin",
-    "investment_horizon_days": 1825,
-    "rationale": "Why these model targets and tolerances; not a proven optimum.",
-    "change_reason": null,
-    "allocations": [
-      {"instrument_key": "ISIN:IE00EXAMPLE00", "name": "Example ETF", "target_weight_pct": 60, "tolerance_pct": 2},
-      {"instrument_key": "CASH", "name": "Cash", "target_weight_pct": 40, "tolerance_pct": 2}
-    ]
+  "id": "one caller-generated report UUID",
+  "source_fingerprint": "unchanged 64-character token from context",
+  "generator": "codex_skill",
+  "generator_version": "portfolio-briefing/4",
+  "schema_version": 4,
+  "expected_plan_version": 0,
+  "briefing": {
+    "title": "Erste Prüfung des importierten Depots",
+    "content_markdown": "Der Anlageplan steht; für die aktuelle Entscheidung fehlen noch vergleichbare Bewertungsdaten.\n\nHier folgt die frei gegliederte, belegte Einordnung des tatsächlichen Depots."
+  },
+  "plan_update": {
+    "content_markdown": "# Anlageplan\n\nHier steht der vollständige, aus dem tatsächlichen Kontext begründete langfristige Plan einschließlich Zielen, Finanzierung und Risiken.",
+    "change_reason": "Erstmaliger Anlageplan auf Grundlage des importierten Portfolios."
   }
 }
 ```
 
-This structural example is not an allocation to copy. Allocations cover all current instruments, intended additions, and cash exactly once and total 100%. Use zero targets for intended exits. Reuse the complete stored strategy when unchanged. A change retains its ID, increments its revision by one, and includes a substantive `change_reason`. Set `expected_state_version` from context, or 0 for the first plan.
+This is a structural example, not a finished report or prescribed allocation. Use actual UUIDs, evidence and content. First publication: `expected_plan_version=0` and a complete `plan_update`. Later: use `context.plan.version`. Omit `plan_update` when the plan is unchanged. For a substantive revision supply the complete replacement Markdown and a specific `change_reason`; do not send a patch or choose a new plan identity/version. The server preserves `plan_id`, increments `version` only when content changes and attaches the exact version to the report. Identical text (normalized line endings and surrounding whitespace) creates no revision, even if submitted again with a different reason.
 
-For an explicit withdrawal, `briefing.plan.resolutions` optionally contains `[{"action_id": "open action UUID", "reason": "documented reason"}]`. Use this for a justified strategy revision that no longer supports the recommendation, or qualifying target attainment; never silently omit an open step or fake an urgent event to cancel it. The stored record retains `resolution_reason` in history. This is not a user confirmation.
+Markdown may be short or long with freely chosen headings, paragraphs, lists and tables. There are no summary/strategy/action fields, mandatory hold, action count or old short field limits. Technical ceilings: title 300 characters, each Markdown document 2,000,000 characters, change reason 20,000 characters. Nonblank content is required. Raw HTML is not executable or rendered as HTML; use Markdown.
 
-### Concrete action
+Report day, publication time, snapshot association and research references are set by the server, never supplied by the skill. Cite included evidence inside the Markdown as appropriate. Do not add unsupported fields.
 
-Every non-hold action includes:
-
-```json
-{
-  "id": "stable action UUID",
-  "priority": 1,
-  "action": "reduce",
-  "subject": {"kind": "instrument", "name": "Example ETF", "isin": "IE00EXAMPLE00"},
-  "instrument_key": "ISIN:IE00EXAMPLE00",
-  "target_weight_pct": 60,
-  "next_target_weight_pct": 68,
-  "rationale": "One short investment or concentration reason.",
-  "horizon_days": 1825,
-  "confidence": "medium",
-  "reason_kind": "risk_reallocation",
-  "review_after": "2026-09-19T10:00:00+02:00",
-  "execution_window_days": 14,
-  "alternatives": "No change versus this reduction and relevant substitutes; why this path was selected.",
-  "pacing_rationale": "Why this step balances continued exposure, uncertainty, and costs.",
-  "funding_action_ids": [],
-  "predecessor_id": null,
-  "replacement_reason": null,
-  "evidence_refs": [{"source_type": "portfolio_snapshot", "source_id": "current snapshot UUID"}]
-}
-```
-
-The example assumes a current share above 68%; use actual context values and dates.
-
-- Actions: `buy`, `increase`, `reduce`, `sell`; `sell` has final target 0 even for a staged partial exit. Non-hold subject: concrete instrument or cash.
-- `target_weight_pct`: final share equal to the strategy target.
-- `next_target_weight_pct`: next share strictly in the direction from current to final, without overshoot. This difference determines the displayed next amount.
-- `reason_kind`: `risk_reallocation`, `opportunity`, or `urgent_deterioration`.
-- `review_after`: timezone-aware ISO timestamp in the future at publication for NEW actions; earliest review, not an automatic next step. Retain existing dates when carrying an unchanged action. `execution_window_days`: one current-step window anchored to the server's original `proposed_at`, not a rolling window from the latest briefing. An expired window does not authorize a new action or catch-up orders. `horizon_days`: investment horizon.
-- `funding_action_ids`: if total purchases exceed recorded cash, EVERY purchase names ALL sales supporting this executable package. The server uses this conservative joint-package rule, not independent per-card cash budgets. A checkbox earns no funding credit. Both next and final package allocations must reconcile with recorded holdings/cash; untouched holdings remain held. Optional cash-action targets must match their respective package residuals within €0.01, with the final also matching the strategy cash target; cash is not another funding source.
-- `predecessor_id`: terminal prior action when a qualifying import permits a residual step. `replacement_reason`: explicit reason when a documented strategy revision replaces an OPEN recommendation without claiming progress; this need not be urgent. Confirmed actions still require a qualifying new statement. Do not link an old ancestor with an existing successor.
-- Evidence is `{source_type: "analysis" | "portfolio_snapshot", source_id: UUID}`, exclusively from this context. No user confirmation fields may be generated.
-
-Summary ≤500 characters; visible strategy ≤400; rationale ≤240; subject name ≤80. Unique priorities, at most five changes plus one hold, no duplicate instrument recommendations. Retain an unchanged open action's ID and execution intent; new words or reports do not advance its target.
-
-### Consolidated hold
-
-```json
-{
-  "priority": 6,
-  "action": "hold",
-  "subject": {"kind": "remaining_positions", "name": "Alle übrigen Positionen"},
-  "rationale": "Für zusätzliche Umschichtungen gibt es derzeit keinen ausreichend starken Grund.",
-  "horizon_days": 365,
-  "confidence": "medium",
-  "evidence_refs": [{"source_type": "portfolio_snapshot", "source_id": "current snapshot UUID"}]
-}
-```
-
-Holds omit targets and execution metadata. The optional group is at most once, last by priority, for untouched current instruments, not cash or individually traded holdings.
-
-Zero trades still requires one justified hold in `actions`, not an empty array. With no instrument positions (all cash), use a single `portfolio` hold rather than an empty remaining-positions group.
-
-## Progress and recovery
-
-Briefing and plan updates commit atomically. New IDs for an already recommended instrument need a linked transition; a new report, checkbox, or elapsed review alone is insufficient. Date-only snapshots must postdate the confirmation day in the strategy time zone. Preserve history when progress is ambiguous.
-
-For a previously recommended instrument, link the most recent terminal record, including a `resolved` one if later drift justifies another step. Never omit a confirmed ancestor's later successor. Unchanged open actions may be carried across a newer snapshot without advancing their target; their original baseline is retained and the dashboard suppresses obsolete amounts. Recalculated steps require the qualifying successor transition. Refresh evidence references from the current context, not excluded historical reports.
-
-Carry immutable execution intent exactly: action type, instrument key, final/next targets, review date, execution window, reason category, funding IDs, and predecessor. A carried action on an obsolete snapshot is display/history only; do not use its old delta to fund a new executable package. A same-snapshot pending purchase may retain its original dependency on an already-confirmed sale without re-emitting that sale. It remains conditional on available proceeds, never treated as verified cash.
-
-Success returns `{id, created}`. An identical retry returns the stored generation with `created=false`. Retry only a transport-uncertain write, once at most, with identical UUID/content. Validation, UUID conflict, or changed-context errors are hard failures; preserve the draft and report the blocker.
-
-Only the web app lets the user confirm/undo with `PUT /api/v1/dashboard/actions/{id}/confirmation`, body `{confirmed, expected_state_version}`. This skill never calls it. No holdings, quantities, or cash are changed.
+Success: `{id, created}`. Identical retries return the original ID with `created=false`; concurrent requests for the same successful context resolve to the stored winner or a conflict, never another review. Reusing an ID with changed arguments is rejected. A stale input, wrong expected plan version or invalid initial plan fails atomically. V1–V3 writers receive a clear upgrade error and cannot change a V4 plan.

@@ -15,7 +15,7 @@ Cross-platform plugin marketplace for Codex and Claude Code. It bundles the Port
 
 The skills expect the local [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application to be running. The plugin includes its MCP bridge and secure pairing flow; no environment token is needed.
 
-The updated briefing workflow requires app schema 3 (`portfolio-briefing/3`). Update the app alongside the plugin; the skill does not silently downgrade to older briefing formats. Confirming an action in the app records only a user assertion, never a broker execution or cash balance. Later statements drive revised follow-up recommendations; ordinary daily research does not automatically create another tranche.
+The briefing workflow requires app schema 4 (`portfolio-briefing/4`). Update the app alongside the plugin. It maintains immutable Markdown investment-plan versions and publishes a separate German daily report comparing the last successful review with current holdings and research. New statements inform observed progress; prices or weight changes do not prove trades. There is no completion/confirmation feature. Older writers receive an upgrade error.
 
 ## Install in Codex
 

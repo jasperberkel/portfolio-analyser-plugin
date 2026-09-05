@@ -1,7 +1,7 @@
 interface:
   display_name: "Portfolio Briefing"
-  short_description: "Konkrete Portfolioaktionen aus allen Berichten"
-  default_prompt: "Use $portfolio-briefing to update my ongoing allocation plan and propose a few funded next steps with separate long-term goals."
+  short_description: "Anlageplan fortführen und Tageslage einordnen"
+  default_prompt: "Use $portfolio-briefing to review my long-term investment plan and publish a German daily briefing about changes since the last successful review."
 dependencies:
   tools:
     - type: "mcp"

@@ -1,6 +1,6 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Securely connect Portfolio Analyser, import portfolios, run research and briefings, and configure recurring jobs.",
   "author": {
     "name": "Jasper Berkel",
