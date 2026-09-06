@@ -24,6 +24,6 @@ Call `publish_portfolio_snapshot_and_analysis(snapshot, positions, analysis)` wi
 
 The snapshot ID is deterministic and already supplied by the builder. Do not add fields containing source filenames, account identifiers, or extracted raw text. The historical `portfolio.initial` analysis type remains unchanged for app compatibility and is also used for later imports. A retry must reuse both IDs and identical payloads. A conflicting ID is a hard failure.
 
-## Future analysis-only jobs
+## Follow-up analysis
 
-Scheduled skills use `get_current_positions()` for context and publish exactly one completed Markdown result with `publish_analysis(id, analysis_type, content_markdown)`. They do not create run records, partial reports, or structured research items.
+After confirmed import publication, continue with [Run Analysis](../../run-analysis/SKILL.md). It loads fresh context through `get_analysis_context` and publishes the complete research and strategy package through `publish_analysis_run`. Import and follow-up are separate atomic publications: a failed analysis does not undo the successful import. Do not use the legacy individual `publish_analysis` workflow for this follow-up or scheduled runs.

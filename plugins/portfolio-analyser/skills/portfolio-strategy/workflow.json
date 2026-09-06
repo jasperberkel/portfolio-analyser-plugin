@@ -1,9 +1,0 @@
-{
-  "contract_version": 1,
-  "skill": "portfolio-strategy",
-  "stage": "strategy",
-  "requires": [
-    "strategy_context"
-  ],
-  "produces": "portfolio.strategy"
-}

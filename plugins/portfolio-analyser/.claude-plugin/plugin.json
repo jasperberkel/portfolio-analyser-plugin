@@ -1,7 +1,7 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.7.0",
-  "description": "Coordinate parallel research and portfolio strategy, import portfolios, and schedule complete analysis runs.",
+  "version": "0.8.0",
+  "description": "Coordinate dependent market, instrument, valuation and portfolio-risk research with atomic strategy publication.",
   "author": {
     "name": "Jasper Berkel",
     "url": "https://github.com/jasperberkel"

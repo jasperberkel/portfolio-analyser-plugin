@@ -1,0 +1,4 @@
+interface:
+  display_name: "Portfolio-Struktur und Risiko"
+  short_description: "Portfolio-Struktur und Risiko für nachvollziehbare Analysen"
+  default_prompt: "Nutze $portfolio-risk-research für einen belegten Research-Entwurf."

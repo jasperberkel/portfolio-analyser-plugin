@@ -1,6 +1,0 @@
-interface:
-  display_name: "Portfolio Position Research"
-  short_description: "Portfolio-Positionen auswählen und aktuell bewerten"
-  default_prompt: "Use $portfolio-position-research to create a German draft from the supplied inputs; do not access the Portfolio Analyser app."
-policy:
-  allow_implicit_invocation: true

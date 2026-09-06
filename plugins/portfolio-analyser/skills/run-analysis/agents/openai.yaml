@@ -1,7 +1,7 @@
 interface:
   display_name: "Run Analysis"
   short_description: "Research parallel ausführen und Portfolio-Strategie veröffentlichen"
-  default_prompt: "Use $run-analysis to complete parallel research, portfolio strategy and atomic publication to Portfolio Analyser."
+  default_prompt: "Use $run-analysis to complete dependency-aware research, portfolio strategy and atomic publication to Portfolio Analyser."
 dependencies:
   tools:
     - type: "mcp"

@@ -153,6 +153,28 @@ class WorkflowTests(unittest.TestCase):
         for name in self.state["tasks"]:
             self.complete(name)
 
+    def test_generation_notes_validate_and_survive_publication(self):
+        self.all_research()
+        self.prepare()
+        for notes in ("", " \n ", "a" * 20_001, 7, []):
+            with self.subTest(notes=repr(notes)[:40]):
+                result = self.final_strategy()
+                result["strategy"]["generation_notes_markdown"] = notes
+                with self.assertRaisesRegex(ValueError, "generation notes"):
+                    workflow.accept_strategy(self.folder, result)
+        result = self.final_strategy()
+        result["strategy"]["generation_notes_markdown"] = "a" * 20_000
+        workflow.accept_strategy(self.folder, result)
+        self.assertEqual(workflow.publication(self.folder)["strategy"], result["strategy"])
+
+    def test_null_generation_notes_are_accepted(self):
+        self.all_research()
+        self.prepare()
+        result = self.final_strategy()
+        result["strategy"]["generation_notes_markdown"] = None
+        workflow.accept_strategy(self.folder, result)
+        self.assertEqual(workflow.publication(self.folder)["strategy"], result["strategy"])
+
     def test_input_partition_does_not_leak_portfolio_into_market_worker(self):
         market = workflow.read(self.folder / "market" / "input.json")
         positions = workflow.read(self.folder / "positions" / "input.json")
@@ -499,7 +521,7 @@ class DiscoveryAndProfileTests(unittest.TestCase):
     def test_installed_plugin_contracts_discover(self):
         discovered = workflow.discover(PLUGIN)
         self.assertEqual(sum(s["stage"] == "strategy" for s in discovered["steps"]), 1)
-        self.assertEqual(sum(s["stage"] == "research" for s in discovered["steps"]), 3)
+        self.assertEqual(sum(s["stage"] == "research" for s in discovered["steps"]), 5)
         self.assertIn("portfolio-strategy", {s["skill"] for s in discovered["steps"]})
 
     def test_unknown_versions_inputs_duplicate_types_and_cycles_rejected(self):

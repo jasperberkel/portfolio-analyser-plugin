@@ -1,0 +1,4 @@
+interface:
+  display_name: "Instrumentenresearch"
+  short_description: "Instrumentenresearch für nachvollziehbare Analysen"
+  default_prompt: "Nutze $instrument-research für einen belegten Research-Entwurf."

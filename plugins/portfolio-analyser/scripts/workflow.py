@@ -422,7 +422,9 @@ def accept_strategy(folder, value):
         )
         document = value["strategy"]
         require(
-            set(document) == {"title", "content_markdown"}, "Invalid strategy document"
+            {"title", "content_markdown"} <= set(document)
+            <= {"title", "content_markdown", "generation_notes_markdown"},
+            "Invalid strategy document",
         )
         require(
             isinstance(document["title"], str)
@@ -434,6 +436,12 @@ def accept_strategy(folder, value):
             isinstance(document["content_markdown"], str)
             and 0 < len(document["content_markdown"].strip()) <= 2_000_000,
             "Invalid strategy text",
+        )
+        notes = document.get("generation_notes_markdown")
+        require(
+            notes is None
+            or isinstance(notes, str) and bool(notes.strip()) and len(notes) <= 20_000,
+            "Invalid strategy generation notes",
         )
         plan = task["strategy_context"]["dashboard"]["plan"]
         require(
@@ -489,6 +497,77 @@ def publication(folder):
     write(path, result)
     return result
 
+
+# V1 remains available for historical fixtures; installed workflow uses V2.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import research_contract as research_v2
+import workflow_v2
+from types import SimpleNamespace
+
+_legacy_discover = discover
+_legacy_initialize = initialize
+_legacy_start = start
+_legacy_collect = collect
+_legacy_draft = draft
+_legacy_prepared = prepared
+_legacy_accept_strategy = accept_strategy
+_legacy_validate_result = validate_result
+
+
+def discover(root=ROOT):
+    path = Path(root) / "workflow.json"
+    if not path.exists():
+        return _legacy_discover(root)
+    flow = research_v2.validate_workflow(read(path))
+    for step in flow["steps"]:
+        require((Path(root) / "skills" / step["skill"] / "SKILL.md").is_file(), "Missing skill")
+    return flow
+
+
+def initialize(folder, context, workflow):
+    if workflow["contract_version"] == 2:
+        return workflow_v2.initialize(folder, context, workflow)
+    return _legacy_initialize(folder, context, workflow)
+
+
+def is_v2(folder):
+    return read_state(folder)["workflow"]["contract_version"] == 2
+
+
+def start(folder, skill):
+    return workflow_v2.start(folder, skill) if is_v2(folder) else _legacy_start(folder, skill)
+
+
+def collect(folder, skill, failed=False):
+    return workflow_v2.collect(folder, skill, failed) if is_v2(folder) else _legacy_collect(folder, skill, failed)
+
+
+def draft(folder):
+    return workflow_v2.draft(folder) if is_v2(folder) else _legacy_draft(folder)
+
+
+def prepared(folder, value):
+    result = _legacy_prepared(folder, value)
+    if is_v2(folder):
+        result["contract_version"] = 2
+        write(Path(folder) / "strategy" / "input.json", result)
+    return result
+
+
+def accept_strategy(folder, value):
+    if is_v2(folder):
+        return workflow_v2.accept_strategy(folder, value, _legacy_accept_strategy)
+    return _legacy_accept_strategy(folder, value)
+
+
+def validate_result(result, task):
+    if task["contract_version"] == 2:
+        return research_v2.validate_result(result, task)
+    return _legacy_validate_result(result, task)
+
+
+workflow_v2.HOST = SimpleNamespace(read=read, write=write, read_state=read_state, ready=ready,
+                                    packet=packet, fingerprint=fingerprint)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

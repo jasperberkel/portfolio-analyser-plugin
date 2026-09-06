@@ -1,0 +1,72 @@
+{
+  "contract_version": 2,
+  "steps": [
+    {
+      "task_id": "market",
+      "skill": "market-discovery-research",
+      "stage": "research",
+      "depends_on": [],
+      "produces": "market.discovery",
+      "payload_type": "market",
+      "methodology_revision": "1"
+    },
+    {
+      "task_id": "holdings",
+      "skill": "instrument-research",
+      "stage": "research",
+      "depends_on": [],
+      "produces": "instrument.research",
+      "payload_type": "instruments",
+      "methodology_revision": "1"
+    },
+    {
+      "task_id": "candidates",
+      "skill": "instrument-research",
+      "stage": "research",
+      "depends_on": [
+        "market"
+      ],
+      "produces": "instrument.research",
+      "payload_type": "instruments",
+      "methodology_revision": "1"
+    },
+    {
+      "task_id": "valuation",
+      "skill": "valuation-thesis-research",
+      "stage": "research",
+      "depends_on": [
+        "holdings",
+        "candidates"
+      ],
+      "produces": "valuation.thesis",
+      "payload_type": "valuation",
+      "methodology_revision": "1"
+    },
+    {
+      "task_id": "risk",
+      "skill": "portfolio-risk-research",
+      "stage": "research",
+      "depends_on": [
+        "holdings"
+      ],
+      "produces": "portfolio.risk",
+      "payload_type": "risk",
+      "methodology_revision": "1"
+    },
+    {
+      "task_id": "strategy",
+      "skill": "portfolio-strategy",
+      "stage": "strategy",
+      "depends_on": [
+        "market",
+        "holdings",
+        "candidates",
+        "valuation",
+        "risk"
+      ],
+      "produces": "portfolio.strategy",
+      "payload_type": "strategy",
+      "methodology_revision": "1"
+    }
+  ]
+}

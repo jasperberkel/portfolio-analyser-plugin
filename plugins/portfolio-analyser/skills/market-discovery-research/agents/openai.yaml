@@ -1,0 +1,4 @@
+interface:
+  display_name: "Markt- und Chancenradar"
+  short_description: "Markt- und Chancenradar für nachvollziehbare Analysen"
+  default_prompt: "Nutze $market-discovery-research für einen belegten Research-Entwurf."

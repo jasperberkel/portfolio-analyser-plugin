@@ -1,7 +1,7 @@
 interface:
   display_name: "Portfolio Import"
-  short_description: "Portfolio-Dokumente analysieren und synchronisieren"
-  default_prompt: "Use $portfolio-import to analyze these portfolio documents and synchronize the consolidated portfolio."
+  short_description: "Portfolio importieren und vollständige Analyse starten"
+  default_prompt: "Use $portfolio-import to import these portfolio documents and automatically run the complete research and strategy analysis after successful synchronization."
 dependencies:
   tools:
     - type: "mcp"

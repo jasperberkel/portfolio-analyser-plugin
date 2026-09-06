@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bewertung und Thesenprüfung"
+  short_description: "Bewertung und Thesenprüfung für nachvollziehbare Analysen"
+  default_prompt: "Nutze $valuation-thesis-research für einen belegten Research-Entwurf."
