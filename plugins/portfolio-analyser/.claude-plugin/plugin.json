@@ -1,6 +1,6 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Coordinate dependent market, instrument, valuation and portfolio-risk research with atomic strategy publication.",
   "author": {
     "name": "Jasper Berkel",
@@ -14,13 +14,5 @@
     "research",
     "markets"
   ],
-  "skills": "./skills/",
-  "mcpServers": {
-    "portfolio_analyser": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/bin/portfolio-analyser-bridge",
-      "args": [
-        "mcp"
-      ]
-    }
-  }
+  "skills": "./skills/"
 }

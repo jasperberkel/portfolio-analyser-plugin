@@ -9,8 +9,8 @@
     {
       "name": "portfolio-analyser",
       "source": "./plugins/portfolio-analyser",
-      "description": "Secure local connection, portfolio import, research, briefings, and recurring schedule setup.",
-      "version": "0.8.0",
+      "description": "OAuth connection, personal portfolio import, research, and recurring analysis.",
+      "version": "0.9.0",
       "author": {
         "name": "Jasper Berkel"
       },

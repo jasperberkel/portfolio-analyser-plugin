@@ -1,0 +1,4 @@
+{
+  "environment": "development",
+  "mcp_url": "http://localhost:3300/mcp"
+}

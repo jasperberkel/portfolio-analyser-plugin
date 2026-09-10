@@ -1,5 +1,0 @@
-15d82bd4fca805120ca27cf75c11bddc4f119d9561b026a1943e5c24a6e0b3ac  bin/portfolio-analyser-bridge.exe
-a0541d66cfdabeb1c652007f027a812ea9afd35cd3b47dc1dabf09f1ffc898c4  bin/native/darwin-amd64/portfolio-analyser-bridge
-41fc6e78b7dab6924b0216d4f09234b2080863e784feff214dd2f3205bd1a097  bin/native/darwin-arm64/portfolio-analyser-bridge
-3676854ae358344a99cda404505f5fbd633817dd5984860589d893257ef9a78e  bin/native/linux-amd64/portfolio-analyser-bridge
-476f9c864f92b7cc996d4a8924980b482d74fbf2487923a096a7bf4a32d68947  bin/native/linux-arm64/portfolio-analyser-bridge

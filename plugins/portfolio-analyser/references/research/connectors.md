@@ -4,11 +4,11 @@ This is the single provider/tool routing reference for all research skills. It i
 
 ## Current configuration
 
-Public sources are the default. No premium financial connector is required or installed by this workflow. Use the host's available web search/fetch tools to find and read primary issuer filings, investor-relations releases, fund issuer holdings/product documents, central-bank/statistical publications and official protocol records. Reputable independent reporting may establish contrary evidence. The app's portfolio bridge is not a research data provider and remains orchestrator-only.
+Public sources are the default. No premium financial connector is required or installed by this workflow. Use the host's available web search/fetch tools to find and read primary issuer filings, investor-relations releases, fund issuer holdings/product documents, central-bank/statistical publications and official protocol records. Reputable independent reporting may establish contrary evidence. The app's portfolio MCP server is not a research data provider and remains orchestrator-only.
 
 ## Optional native MCP connections
 
-When a connection has been configured and authenticated in the host, inspect its actually available tools and their input schemas. Choose by required dataset, coverage, period and access rights, not merely the presence of a server. Call its native tools directly. Do not invent tool names, use the app bridge to proxy it, install software, buy access or create API credential scripts.
+When a connection has been configured and authenticated in the host, inspect its actually available tools and their input schemas. Choose by required dataset, coverage, period and access rights, not merely the presence of a server. Call its native tools directly. Do not invent tool names, use the portfolio MCP server to proxy it, install software, buy access or create API credential scripts.
 
 Maintain provider-specific instructions only in this section. Example future mapping (not an active dependency): Daloopa can identify companies with `discover_companies`, discover series with `discover_company_series`, retrieve values with `get_company_fundamentals`, and retrieve documents with `discover_company_documents` / `get_document_content`. Verify the connected server exposes these tools and inspect their schemas before use. This example does not guarantee a licensed dataset or host access.
 

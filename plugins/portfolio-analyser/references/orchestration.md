@@ -23,3 +23,7 @@ R1 receives only its own independent prior state. R2/R3 receive assigned instrum
 One research.core setting includes/excludes the four core reports as a package, not task execution. Other independent reports remain individually selectable. An excluded package contributes neither Markdown nor structured data to strategy. Old report types remain archived after the first V2 run. The full included context must fit host and transport limits; never silently truncate.
 
 All envelope, typed payload and strategy output rules are in [research-contract-v2.md](research-contract-v2.md) and [draft-contract.md](draft-contract.md). Provider-specific instructions are only in [research/connectors.md](research/connectors.md). No new provider connections are part of the default release.
+
+## Runs across midnight
+
+V2 fixes the Berlin report date and evidence-age selection at research_cutoff. Preparation and publication re-read the live portfolio, plan, preferences and reports against that original clock; changes still invalidate the source fingerprint. Research completion may occur on a later date, but must be between cutoff and actual publication time. Source evidence remains limited to the original cutoff. Preserve real timestamps and IDs. Publication is stored under the original report date, with the actual generated_at timestamp; a new calendar day can still start its own review. V1 keeps its historical same-day rule.

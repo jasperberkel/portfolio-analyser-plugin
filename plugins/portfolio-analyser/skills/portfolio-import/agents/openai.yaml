@@ -8,6 +8,5 @@ dependencies:
       value: "portfolio_analyser"
       description: "Lokale Portfolio-Web-App für Snapshots und Analysen"
       transport: "streamable_http"
-      url: "http://127.0.0.1:8010/mcp"
 policy:
   allow_implicit_invocation: true

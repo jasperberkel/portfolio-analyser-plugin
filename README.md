@@ -15,9 +15,11 @@ Cross-platform plugin marketplace for Codex and Claude Code. It bundles the Port
 
 ## Prerequisite
 
-The orchestrator and import/setup workflows expect the local [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application to be running. The plugin includes its MCP bridge and secure pairing flow; no environment token is needed.
+Setup and workflow helpers require Python 3.11 or newer. Native Codex/Claude Code must support HTTP MCP, OAuth and preregistered public client IDs.
 
-The strategy workflow uses Markdown schema 4 (`portfolio-strategy/4`) and requires app migration `0007_research_v2`. Update the app alongside the plugin. It maintains immutable Markdown investment-plan versions and publishes a separate German daily report comparing the last successful review with current holdings and research. New statements inform observed progress; prices or weight changes do not prove trades. There is no completion/confirmation feature. Older writers receive an upgrade error.
+The orchestrator and import/setup workflows expect the configured [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application to be running. Run the setup skill to connect using native HTTP MCP and OAuth. The plugin supplies the application address automatically; users only sign in and approve access. The client securely stores its tokens; there is no bridge, connection code, PAT or shell fallback.
+
+The strategy workflow uses Markdown schema 4 (`portfolio-strategy/4`) and requires app migration `0008_users_and_portfolios`. Update the app alongside the plugin. It maintains immutable Markdown investment-plan versions and publishes a separate German daily report comparing the last successful review with current holdings and research. New statements inform observed progress; prices or weight changes do not prove trades. There is no completion/confirmation feature. Older writers receive an upgrade error.
 
 ## Install in Codex
 
@@ -116,3 +118,18 @@ Use Python 3.11+ for the plugin test suite: `python -m unittest discover -s test
 Upgrade the app through migration 0007 before installing plugin 0.8.0. The four core reports share one research.core preference: existing exclusions and the strictest age limit are retained. Both Markdown and structured evidence are excluded together. Additional independent reports remain selectable. Existing schedules are not changed by the release; setup handles explicitly requested schedule migrations.
 
 Adapted Anthropic methods and license are documented in [attribution](plugins/portfolio-analyser/references/anthropic-sources.md). No upstream agent runtime is installed.
+
+Version 0.9.0 requires the multi-user app migration `0008_users_and_portfolios`. Run the setup skill and sign in to a verified account; no address entry is needed. Existing schedules are switched only after a successful complete native analysis run.
+
+## Application endpoint configuration
+
+The publisher sets `plugins/portfolio-analyser/config/connection.json`. Setup resolves this file
+relative to the installed plugin, so it also works from a cache or an unrelated working directory.
+Users do not pass a URL. `configure_mcp.py --host codex` (or `--host claude`) starts the native
+connection; `--dry-run` previews it without changing client configuration.
+
+The current package explicitly uses `environment: development` and the local app at
+`http://localhost:3300/mcp`. Before a hosted release, set `environment: production` and the
+actual public HTTPS `mcp_url` in that same publisher-managed file. There is no hosted domain
+configured yet. Production mode rejects loopback and HTTP URLs. Invalid packages fail with a
+configuration error and never ask the user to repair them by entering an address.

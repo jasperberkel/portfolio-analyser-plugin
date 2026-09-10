@@ -1,6 +1,6 @@
 # Portfolio Analyser MCP contract
 
-Use the MCP server named `portfolio_analyser` at `http://127.0.0.1:8010/mcp`.
+Use the MCP server named `portfolio_analyser` at the installation URL configured by portfolio-analyser-setup.
 
 ## Read tools
 

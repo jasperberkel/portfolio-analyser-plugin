@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "portfolio_analyser": {
-      "command": "./bin/portfolio-analyser-bridge",
-      "args": ["mcp"]
-    }
-  }
-}
