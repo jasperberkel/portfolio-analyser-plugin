@@ -70,6 +70,13 @@ class V2Tests(unittest.TestCase):
         self.assertEqual(len(task["selected"]), 2)
         self.assertEqual(task["hypotheses"], ["Speichertechnik könnte wachsen."])
 
+    def test_existing_receipt_stops_without_writing_run_files(self):
+        other = self.path / "repeat"
+        self.ctx["existing_run"] = {"run_id": str(uuid.uuid4())}
+        with self.assertRaisesRegex(ValueError, "already has a successful run"):
+            w.initialize(other, self.ctx, c.default_workflow())
+        self.assertFalse(other.exists())
+
     def test_zero_candidates_and_cash_only(self):
         other = self.path / "cash"
         ctx = context()

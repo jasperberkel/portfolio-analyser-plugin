@@ -7,9 +7,11 @@ import json
 import re
 import sys
 import uuid
+from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, replace
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from pathlib import Path
 from typing import Any
 
@@ -215,7 +217,7 @@ def parse_manifest(raw: Any, label: str = "Manifest") -> Manifest:
         for index, item in enumerate(warning_values)
     ]
 
-    calculated = sum((item.market_value for item in positions), Decimal(0)) + cash_value
+    calculated = _sum(item.market_value for item in positions) + cash_value
     if calculated <= 0:
         raise ValidationError(f"{label} enthält keinen positiven Portfoliowert")
     if "reported_total_value" in raw and raw["reported_total_value"] is not None:
@@ -246,45 +248,56 @@ def _identity(position: Position) -> tuple[str, ...]:
     return ("name", position.asset_type, normalized_name)
 
 
-def _merge(existing: Position, incoming: Position) -> Position:
-    if existing.asset_type != incoming.asset_type or existing.currency != incoming.currency:
-        raise ValidationError(f"Widersprüchliche Daten für {existing.name}")
-    if existing.isin and incoming.isin and existing.isin != incoming.isin:
-        raise ValidationError(f"Widersprüchliche ISIN für {existing.name}")
-    if existing.symbol and incoming.symbol and existing.symbol != incoming.symbol:
-        raise ValidationError(f"Widersprüchliches Symbol für {existing.name}")
+def _sum(values: Iterable[Decimal]) -> Decimal:
+    # A canonical order also keeps sums stable when Decimal precision is exhausted.
+    return sum(sorted(values), Decimal(0))
 
-    quantity = existing.quantity + incoming.quantity
-    market_value = existing.market_value + incoming.market_value
-    price = market_value / quantity if quantity else max(existing.price, incoming.price)
-    average_buy_price = None
-    if existing.average_buy_price is not None and incoming.average_buy_price is not None:
-        average_buy_price = (
-            (
-                existing.average_buy_price * existing.quantity
-                + incoming.average_buy_price * incoming.quantity
-            )
-            / quantity
-            if quantity
-            else Decimal(0)
+
+def _weighted_buy_price(lots: list[Position]) -> Decimal | None:
+    if any(lot.average_buy_price is None for lot in lots):
+        return None
+
+    # Multiply original lot costs before dividing once at output precision.
+    with localcontext() as ctx:
+        product_digits = max(
+            len(lot.quantity.as_tuple().digits) + len(lot.average_buy_price.as_tuple().digits)
+            for lot in lots
         )
+        ctx.prec = max(ctx.prec, product_digits) + len(str(len(lots)))
+        total_cost = _sum(lot.average_buy_price * lot.quantity for lot in lots)
+        quantity = _sum(lot.quantity for lot in lots)
+    return total_cost / quantity if quantity else Decimal(0)
+
+
+def _merge(lots: list[Position]) -> Position:
+    first = lots[0]
+    if len(lots) == 1:
+        return first
+    if any(lot.asset_type != first.asset_type or lot.currency != first.currency for lot in lots):
+        raise ValidationError(f"Widersprüchliche Daten für {first.name}")
+    symbols = {lot.symbol for lot in lots if lot.symbol}
+    if len(symbols) > 1:
+        raise ValidationError(f"Widersprüchliches Symbol für {first.name}")
+
+    quantity = _sum(lot.quantity for lot in lots)
+    market_value = _sum(lot.market_value for lot in lots)
+    price = market_value / quantity if quantity else max(lot.price for lot in lots)
     unrealized_pnl = None
     unrealized_pnl_pct = None
-    if existing.unrealized_pnl is not None and incoming.unrealized_pnl is not None:
-        unrealized_pnl = existing.unrealized_pnl + incoming.unrealized_pnl
+    if all(lot.unrealized_pnl is not None for lot in lots):
+        unrealized_pnl = _sum(lot.unrealized_pnl for lot in lots)
         cost_value = market_value - unrealized_pnl
         if cost_value:
             unrealized_pnl_pct = unrealized_pnl / cost_value * Decimal(100)
 
     return replace(
-        existing,
-        isin=existing.isin or incoming.isin,
-        symbol=existing.symbol or incoming.symbol,
-        name=min((existing.name, incoming.name), key=lambda value: value.casefold()),
+        first,
+        symbol=next(iter(symbols), None),
+        name=min((lot.name for lot in lots), key=lambda name: (name.casefold(), name)),
         quantity=quantity,
         price=price,
         market_value=market_value,
-        average_buy_price=average_buy_price,
+        average_buy_price=_weighted_buy_price(lots),
         unrealized_pnl=unrealized_pnl,
         unrealized_pnl_pct=unrealized_pnl_pct,
     )
@@ -332,21 +345,21 @@ def build_payload(raw_manifests: list[Any]) -> dict[str, Any]:
     if len(currency_values) != 1:
         raise ValidationError("Die Manifeste haben unterschiedliche Basiswährungen")
 
-    merged: dict[tuple[str, ...], Position] = {}
+    lots_by_identity: dict[tuple[str, ...], list[Position]] = defaultdict(list)
     for manifest in manifests:
         for position in manifest.positions:
-            key = _identity(position)
-            merged[key] = _merge(merged[key], position) if key in merged else position
+            lots_by_identity[_identity(position)].append(position)
 
     positions = sorted(
-        (_position_payload(item) for item in merged.values()),
+        (_position_payload(_merge(lots)) for lots in lots_by_identity.values()),
         key=lambda item: (
             item["isin"] or "",
             item["symbol"] or "",
             item["name"] or "",
+            item["asset_type"],
         ),
     )
-    cash_value = sum((manifest.cash_value for manifest in manifests), Decimal(0))
+    cash_value = _sum(manifest.cash_value for manifest in manifests)
     position_sum = sum(
         (_decimal(item["market_value"], "market_value") for item in positions),
         Decimal(0),

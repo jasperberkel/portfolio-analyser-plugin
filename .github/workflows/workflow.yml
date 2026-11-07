@@ -3,7 +3,7 @@ name: Native OAuth and workflow contracts
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: ['**']
 
 permissions:
   contents: read
@@ -18,5 +18,10 @@ jobs:
           python-version: '3.12'
       - run: python -m unittest discover -s tests -v
       - run: python plugins/portfolio-analyser/scripts/workflow.py discover
-      - run: python -m pip install .
-      - run: python tests/smoke_advisory_mcp.py
+      - name: Smoke-test the installed wheel from outside the checkout
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+        run: |
+          python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/wheels" .
+          python -m pip install "$RUNNER_TEMP"/wheels/*.whl
+          cd "$RUNNER_TEMP"
+          python -I "$GITHUB_WORKSPACE/tests/smoke_advisory_mcp.py"
