@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "portfolio-advisory"
+dynamic = ["version"]
+description = "Portfolio exposure calculations and research methods for MCP clients"
+requires-python = ">=3.11"
+dependencies = ["mcp==1.27.1", "PyYAML>=6,<7"]
+
+[project.scripts]
+portfolio-advisory = "portfolio_advisory.scripts.advisory_mcp:main"
+
+[tool.hatch.version]
+path = "plugins/portfolio-analyser/.codex-plugin/plugin.json"
+pattern = '"version":\s*"(?P<version>[^"]+)"'
+
+[tool.hatch.build.targets.wheel]
+only-include = ["plugins/portfolio-analyser"]
+sources = {"plugins/portfolio-analyser" = "portfolio_advisory"}
+
+[tool.hatch.build.targets.sdist]
+include = ["/plugins/portfolio-analyser", "/pyproject.toml", "/README.md"]

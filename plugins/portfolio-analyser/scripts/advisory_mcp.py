@@ -1,29 +1,37 @@
 # /// script
 # requires-python = ">=3.11"
-# dependencies = ["mcp==1.27.1"]
+# dependencies = ["mcp==1.27.1", "PyYAML>=6,<7"]
 # ///
 """Portable advisory tools for MCP clients. All personal inputs come from the caller."""
 
 import argparse
 import re
+import sys
 from datetime import date
 from decimal import Decimal
+from importlib import import_module
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated
+
+import yaml
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 from pydantic import BaseModel, Field, StringConstraints, model_validator
-from research_contract import portfolio_risk
 
 ROOT = Path(__file__).resolve().parents[1]
-Skill = Literal[
-    "instrument-research",
-    "market-discovery-research",
-    "portfolio-risk-research",
-    "valuation-thesis-research",
-    "portfolio-strategy",
-]
+if __package__:
+    from .research_contract import portfolio_risk
+    import_root = __package__.split(".")[0] + "."
+else:
+    from research_contract import portfolio_risk
+    sys.path.insert(0, str(ROOT))
+    import_root = ""
+
+# The same import helper also handles the hyphenated Agent Skills directory.
+build_payload = import_module(
+    import_root + "skills.portfolio-import.scripts.build_portfolio_snapshot"
+).build_payload
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 Currency = Annotated[str, StringConstraints(pattern=r"^[A-Z]{3}$")]
 Amount = Annotated[Decimal, Field(ge=0, allow_inf_nan=False, max_digits=32)]
@@ -33,23 +41,48 @@ server = FastMCP(
 
 
 @server.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
-def research_guidance(skill: Skill) -> str:
-    """Load a Portfolio Analyser research method and its referenced documents for a chat client."""
+def list_skills() -> list[dict[str, str]]:
+    """List available skills and short descriptions. Use read_skill for one method."""
+    catalog = []
+    for path in sorted((ROOT / "skills").glob("*/SKILL.md")):
+        front, header, _ = path.read_text(encoding="utf-8").split("---", 2)
+        metadata = yaml.safe_load(header)
+        if front.strip() or metadata["name"] != path.parent.name:
+            raise ValueError(f"Invalid skill metadata in {path.parent.name}")
+        catalog.append({"name": metadata["name"], "description": metadata["description"]})
+    return catalog
+
+
+@server.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+def read_skill(name: str) -> str:
+    """Read one skill and its packaged references. Request linked skills separately."""
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
+        raise ValueError("Invalid skill name")
+    skill = ROOT / "skills" / name / "SKILL.md"
+    if not skill.is_file() or not skill.resolve().is_relative_to(ROOT):
+        raise ValueError("Unknown skill")
     files = {}
-    references = (ROOT / "references").resolve()
 
     def include(path):
         if path in files:
             return
         content = path.read_text(encoding="utf-8")
         files[path] = content
-        for link in re.findall(r"\]\(([^)#]+\.md)(?:#[^)]*)?\)", content):
+        for link in re.findall(r"\]\(([^)#]+\.(?:md|json))(?:#[^)]*)?\)", content):
+            if "://" in link or link.startswith("/"):
+                continue
             target = (path.parent / link).resolve()
-            if target.is_relative_to(references):
+            if target.is_relative_to(ROOT) and target.name != "SKILL.md":
                 include(target)
 
-    include(ROOT / "skills" / skill / "SKILL.md")
+    include(skill)
     return "\n\n".join(f"## {p.relative_to(ROOT)}\n\n{s}" for p, s in files.items())
+
+
+@server.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+def build_portfolio_snapshot(manifests: list[dict[str, object]]) -> dict[str, object]:
+    """Validate and merge normalized source manifests from portfolio-import, without publishing."""
+    return build_payload(manifests)
 
 
 class Position(BaseModel):
@@ -109,9 +142,13 @@ def portfolio_exposure(
     )
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--transport", choices=["stdio", "streamable-http"], default="stdio"
     )
     server.run(transport=parser.parse_args().transport)
+
+
+if __name__ == "__main__":
+    main()

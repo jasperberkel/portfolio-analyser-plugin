@@ -7,6 +7,8 @@ description: Extract, validate, analyze, and synchronize attached portfolio docu
 
 Turn all attached documents that describe the same effective portfolio date into one validated snapshot and one complete German Markdown import analysis in the local Portfolio Analyser app, then run the complete research and strategy workflow.
 
+The host must supply readable attachments or normalized fields. With advisory MCP alone, return the validated snapshot to the caller. Continuing to publication requires the separate authorized app tools listed below. Full analysis also requires the host's research, workspace and worker capabilities.
+
 ## Read and reconcile the documents
 
 1. Locate every attached document that contributes holdings or cash. Accept broker statements, exports, spreadsheets, CSV/JSON, text, word-processing documents, PDFs, and readable scans. Use the format-appropriate reader; do not require a particular broker or file type.
@@ -21,7 +23,7 @@ Turn all attached documents that describe the same effective portfolio date into
 1. Read [references/normalized-input.md](references/normalized-input.md) before constructing the normalized manifests.
 2. Extract only supported portfolio fields. Never invent an identifier, quantity, valuation, exchange rate, cost basis, cash balance, or date. Resolve identifiers through reliable research only when the instrument is already unambiguous.
 3. Express every stored position value in one snapshot base currency. Prefer broker-provided base-currency values; otherwise use a sourced rate for the valuation date and document the conversion in the report. If cash is absent rather than confirmed as zero, set it to zero and retain an explicit warning.
-4. Reconcile every available document total before combining sources. Pass the clean source manifests together through `scripts/build_portfolio_snapshot.py`; its validation must succeed before any write. Do not bypass a validation failure.
+4. Reconcile every available document total before combining sources. Pass the clean source manifests together to the `build_portfolio_snapshot` MCP tool; its validation must succeed before any write. Do not bypass a validation failure.
 
 ## Build the analysis
 

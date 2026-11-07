@@ -1,6 +1,21 @@
 # Portfolio Analyser Plugin
 
-Cross-platform plugin marketplace for Codex and Claude Code. It bundles the Portfolio Analyser workflows while keeping development-only skills in the application repository.
+An on-demand MCP server for portfolio methods and deterministic calculations. Any local stdio MCP client can use the installed Python package.
+
+## Standalone advisory server
+
+Install from this checkout in a Python 3.11+ virtual environment:
+
+```sh
+python -m pip install .
+portfolio-advisory --help
+```
+
+Register the installed `portfolio-advisory` executable (absolute path in the virtual environment) as a stdio MCP command with no arguments. It runs from any working directory. The wheel includes the single source of each skill, its references and the calculation code. Clients use only MCP. `list_skills` returns names and descriptions. `read_skill` returns one selected method and its linked local references. `build_portfolio_snapshot` validates and reconciles normalized manifests without writing. `portfolio_exposure` calculates weights and fund look-through. Stdio starts on demand and makes no model calls.
+
+Research requires the client to supply evidence or use its own research tools. Import requires the host to read attachments. App publication needs an authorized app connection. Full runs also require workflow helpers, writable task storage and worker support. Setup uses the host's OAuth, profiles, approval and scheduler facilities. Listing or reading these methods performs none of those actions. A hosted client needs a reachable authenticated MCP endpoint supplied by its operator.
+
+Verify the installation with `python tests/smoke_advisory_mcp.py` with the virtual environment on PATH. Import, persistence and scheduled analysis have the separate application requirements below.
 
 ## Included skills
 
@@ -21,7 +36,7 @@ The orchestrator and import/setup workflows expect the configured [Portfolio Ana
 
 The strategy workflow uses Markdown schema 4 (`portfolio-strategy/4`) and requires app migration `0008_users_and_portfolios`. Update the app alongside the plugin. It maintains immutable Markdown investment-plan versions and publishes a separate German daily report comparing the last successful review with current holdings and research. New statements inform observed progress; prices or weight changes do not prove trades. There is no completion/confirmation feature. Older writers receive an upgrade error.
 
-## Install in Codex
+## Optional native marketplace in Codex
 
 Add the GitHub marketplace:
 
@@ -31,7 +46,7 @@ codex plugin marketplace add jasperberkel/portfolio-analyser-plugin
 
 Start Codex, open `/plugins`, install **Portfolio Analyser**, and start a new session.
 
-## Install in Claude Code
+## Optional native marketplace in Claude Code
 
 ```bash
 claude plugin marketplace add jasperberkel/portfolio-analyser-plugin
@@ -69,11 +84,7 @@ After installation, ask Codex or Claude Code:
 Set up Portfolio Analyser and its recurring research and briefing jobs.
 ```
 
-The setup skill first asks you to generate a five-minute, single-use code under `http://localhost:3000/settings`. Its bundled helper exchanges that code and stores the permanent credential in macOS Keychain, Windows Credential Manager, or Linux Secret Service. The token is never shown in the app or conversation.
-
-After the MCP handshake and a successful complete manual run, setup creates one daily run-analysis job at 10:00 and pauses the exact legacy jobs. It checks existing schedules before changes. Research participation is defined by the plugin-root V2 workflow.json graph.
-
-Linux requires an installed and unlocked Secret Service such as GNOME Keyring. The setup fails safely instead of writing credentials to a plaintext file.
+The optional app workflow uses native HTTP MCP and OAuth. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. Advisory-only clients can use the four tools immediately.
 
 ## Ask an agent to install it
 
@@ -93,9 +104,7 @@ and install its portfolio-analyser plugin.
 plugins/portfolio-analyser/
   .codex-plugin/plugin.json               Codex manifest
   .claude-plugin/plugin.json              Claude Code manifest
-  .mcp.json                               Codex MCP descriptor
-  .claude-plugin/plugin.json              Claude MCP descriptor and manifest
-  bin/                                    Bundled platform binaries
+  scripts/advisory_mcp.py                 Standalone advisory MCP server
   skills/                                 Shared Agent Skills
 ```
 

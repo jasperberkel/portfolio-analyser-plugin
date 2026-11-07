@@ -1,6 +1,6 @@
 # Normalized portfolio input
 
-Create one JSON manifest per non-overlapping logical source, then pass all manifests to `scripts/build_portfolio_snapshot.py`. A manifest contains only:
+Create one JSON manifest per non-overlapping logical source, then pass the list as `manifests` to the `build_portfolio_snapshot` MCP tool. A manifest contains only:
 
 ```json
 {
@@ -40,7 +40,7 @@ Rules:
 - If a source total exists, include it. The builder checks it against positions plus cash with a small rounding tolerance.
 - Do not put filenames, broker account IDs, personal data, free-form extracted text, citations, or extra fields into a manifest.
 
-Run:
+The equivalent local CLI in a checkout is:
 
 ```bash
 python scripts/build_portfolio_snapshot.py <manifest.json> [<manifest.json> ...]

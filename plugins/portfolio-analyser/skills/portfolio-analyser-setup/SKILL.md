@@ -7,17 +7,21 @@ description: Securely connect the installed Portfolio Analyser plugin to the Por
 
 Connect the installed plugin through native HTTP MCP and OAuth, verify MCP, and configure recurring jobs without creating duplicates. Plugin installation alone is never authorization to connect or create schedules.
 
+## Advisory access and optional app setup
+
+An MCP client that can list and read these instructions already has advisory access. It can use `portfolio_exposure` and `build_portfolio_snapshot` directly. The steps below enable optional account-backed workflows and schedules. These require a reachable application, its OAuth-capable client and user consent. Use the host's own controls for connection, profiles, permissions and scheduling. A hosted agent needs an authenticated reachable MCP endpoint. A local stdio command or loopback URL is usable only from its own machine.
+
 ## Detect the host
 
 Determine the current host from the product context and available scheduling tools. Do not ask when it is unambiguous.
 
 - For Codex or ChatGPT desktop scheduling, read [references/codex.md](references/codex.md).
 - For Claude Code, read [references/claude-code.md](references/claude-code.md).
-- If neither environment can be identified, explain that the supported targets are Codex and Claude Code and ask which one the user is using.
+- For other hosts, check their OAuth, scheduling and worker support first. Report missing capabilities before attempting the corresponding setup step.
 
 ## Connect through native OAuth
 
-The plugin already knows the application's MCP address through `config/connection.json`.
+The plugin already knows the application's MCP address through the [application configuration](../../config/connection.json).
 Never ask users for the application URL, tokens, passwords or connection codes.
 Resolve the installed plugin root from this skill's location; do not derive the address from the
 working directory, browser, previous chat or another installation.
@@ -28,7 +32,7 @@ The bundled development configuration targets the current local app; production 
 contain their public HTTPS address. A missing or invalid configuration is a packaging error:
 report it and stop, rather than asking the user to supply a URL or trying another installation.
 
-The plugin bundles no MCP process or additional server entry, preventing duplicate connections.
+The optional app connection is separate from the read-only advisory tools.
 Run `python3 <plugin-root>/scripts/configure_mcp.py --host codex`
 (or `--host claude`). This registers exactly one native HTTP entry named `portfolio_analyser`
 and opens the native client's OAuth browser login for the configured application.
