@@ -129,3 +129,11 @@ The current package explicitly uses `environment: development` and the local app
 actual public HTTPS `mcp_url` in that same publisher-managed file. There is no hosted domain
 configured yet. Production mode rejects loopback and HTTP URLs. Invalid packages fail with a
 configuration error and never ask the user to repair them by entering an address.
+
+## Publish a versioned branch
+
+From the repository root, run `python3 scripts/publish.py setup` once per clone. This installs the repository-local `git publish` alias and pre-push check. Existing custom hooks require integration before setup.
+
+Commit your changes, then run `git publish`. It targets the current branch’s upstream (default: the same branch name on origin). For an explicit destination use `git publish origin main`. The command fetches the actual push destination, requires a fast-forward, and compares all three manifests. It preserves a higher release version or commits an automatic patch increase based on the remote version. The bump commit contains only the version files. Python wheel metadata derives from the Codex manifest. A successful retry with no new commits leaves the version unchanged.
+
+Plain `git push` uses the pre-push check and rejects a stale version. Run `git publish` for automatic preparation and publication. GitHub Actions independently checks version consistency on branch pushes and against the target of pull requests. Repository administrators can require the `version` check in branch protection for merges.

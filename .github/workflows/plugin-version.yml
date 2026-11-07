@@ -1,0 +1,17 @@
+name: Plugin version
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  version:
+    if: github.event_name == 'pull_request' || (github.ref_type == 'branch' && !github.event.deleted)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the published manifests against the previous target
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 scripts/publish.py check "$BASE" "$HEAD_COMMIT"
