@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "portfolio": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--script",
+        "${CLAUDE_PLUGIN_ROOT}/scripts/advisory_mcp.py"
+      ]
+    }
+  }
+}

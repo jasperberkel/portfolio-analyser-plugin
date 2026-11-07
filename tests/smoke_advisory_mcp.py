@@ -6,17 +6,9 @@
 
 import asyncio
 import shutil
-from pathlib import Path
-import yaml
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-
-SOURCE = (
-    Path(__file__).resolve().parents[1]
-    / "plugins/portfolio-analyser"
-)
-
 
 async def check():
     async with (
@@ -25,34 +17,12 @@ async def check():
         ) as streams,
         ClientSession(*streams) as client,
     ):
-        await client.initialize()
+        capabilities = (await client.initialize()).capabilities
+        assert capabilities.tools and capabilities.resources is None and capabilities.prompts is None
         tools = await client.list_tools()
         assert {tool.name for tool in tools.tools} == {
-            "list_skills", "read_skill", "build_portfolio_snapshot", "portfolio_exposure",
+            "build_portfolio_snapshot", "portfolio_exposure",
         }
-        catalog = await client.call_tool("list_skills", {})
-        assert not catalog.isError
-        entries = catalog.structuredContent["result"]
-        expected = {path.parent.name: path for path in (SOURCE / "skills").glob("*/SKILL.md")}
-        assert {entry["name"] for entry in entries} == set(expected)
-        for entry in entries:
-            name = entry["name"]
-            source = expected[name].read_text()
-            assert entry["description"] == yaml.safe_load(source.split("---", 2)[1])["description"]
-            result = await client.call_tool("read_skill", {"name": name})
-            assert not result.isError and source in result.content[0].text
-            refs = {
-                "portfolio-import": ["references/mcp-contract.md", "references/normalized-input.md"],
-                "portfolio-analyser-setup": ["references/codex.md", "references/claude-code.md", "config/connection.json"],
-                "run-analysis": ["workflow.json", "roles/research-agent.md", "roles/strategy-agent.md"],
-            }
-            for ref in refs.get(name, ["references/research-contract-v2.md"]):
-                path = SOURCE / ref
-                if not path.is_file():
-                    path = expected[name].parent / ref
-                assert f"## {path.relative_to(SOURCE)}\n\n{path.read_text()}" in result.content[0].text
-        for name in ("../../outside", "missing-skill"):
-            assert (await client.call_tool("read_skill", {"name": name})).isError
         manifest = {
             "as_of": "2026-10-01", "base_currency": "EUR", "cash_value": "200",
             "reported_total_value": "1000", "warnings": [], "positions": [{
@@ -106,5 +76,5 @@ async def check():
 if __name__ == "__main__":
     asyncio.run(check())
     print(
-        "Independent MCP client: skill catalog, references, snapshot, exposure and invalid inputs verified."
+        "Independent MCP client: only two tools, valid and invalid snapshots and exposures verified."
     )

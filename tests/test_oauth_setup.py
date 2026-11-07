@@ -35,7 +35,7 @@ class OAuthSetupTests(unittest.TestCase):
             self.assertIn('portfolio_analyser', commands[0])
             self.assertNotIn('--client-secret', commands[0])
             self.assertNotIn('--bearer-token-env-var', commands[0])
-        self.assertFalse((ROOT / '.mcp.json').exists())
+        self.assertEqual(set(json.loads((ROOT / '.mcp.json').read_text())['mcpServers']), {'portfolio'})
         self.assertFalse((ROOT / 'bin').exists())
         self.assertFalse((ROOT / 'scripts/mcp_call.py').exists())
 

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "portfolio": {
+      "command": "uv",
+      "cwd": ".",
+      "args": [
+        "run",
+        "--script",
+        "./scripts/advisory_mcp.py"
+      ]
+    }
+  }
+}

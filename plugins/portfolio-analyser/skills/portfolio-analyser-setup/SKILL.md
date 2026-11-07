@@ -9,7 +9,7 @@ Connect the installed plugin through native HTTP MCP and OAuth, verify MCP, and 
 
 ## Advisory access and optional app setup
 
-An MCP client that can list and read these instructions already has advisory access. It can use `portfolio_exposure` and `build_portfolio_snapshot` directly. The steps below enable optional account-backed workflows and schedules. These require a reachable application, its OAuth-capable client and user consent. Use the host's own controls for connection, profiles, permissions and scheduling. A hosted agent needs an authenticated reachable MCP endpoint. A local stdio command or loopback URL is usable only from its own machine.
+Read this skill through the native skills interface. Verify the separate `portfolio_exposure` and `build_portfolio_snapshot` tools through host tool discovery. The steps below enable optional account-backed workflows and schedules. These require a reachable application, its OAuth-capable client and user consent. Use the host's own controls for connection, profiles, permissions and scheduling. A hosted agent needs an authenticated reachable MCP endpoint. A local stdio command or loopback URL is usable only from its own machine.
 
 ## Detect the host
 

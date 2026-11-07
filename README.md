@@ -1,21 +1,38 @@
 # Portfolio Analyser Plugin
 
-An on-demand MCP server for portfolio methods and deterministic calculations. Any local stdio MCP client can use the installed Python package.
+The package supplies eight native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs two calculations: `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. Neither starts a model.
 
-## Standalone advisory server
+## Local host installation
 
-Install from this checkout in a Python 3.11+ virtual environment:
+From this checkout, with `uv` available on the host PATH and Python 3.11+ available to it, run the commands for your host. Installing the plugin registers both its native skills and its local calculation server. The first tool call can download Python dependencies. Open a fresh session after installation.
+
+**Codex**
+
+```sh
+codex plugin marketplace add "$PWD"
+codex plugin add portfolio-analyser@portfolio-analyser
+```
+
+**Claude Code**
+
+```sh
+claude plugin marketplace add "$PWD"
+claude plugin install portfolio-analyser@portfolio-analyser
+```
+
+For a local update, advance this checkout and install the new plugin version in Codex, or run `claude plugin update portfolio-analyser@portfolio-analyser` in Claude Code. Use the matching host's plugin inspection to check the effective version.
+
+## Calculation-only MCP clients
+
+In a Python 3.11+ virtual environment:
 
 ```sh
 python -m pip install .
 portfolio-advisory --help
+python tests/smoke_advisory_mcp.py
 ```
 
-Register the installed `portfolio-advisory` executable (absolute path in the virtual environment) as a stdio MCP command with no arguments. It runs from any working directory. The wheel includes the single source of each skill, its references and the calculation code. Clients use only MCP. `list_skills` returns names and descriptions. `read_skill` returns one selected method and its linked local references. `build_portfolio_snapshot` validates and reconciles normalized manifests without writing. `portfolio_exposure` calculates weights and fund look-through. Stdio starts on demand and makes no model calls.
-
-Research requires the client to supply evidence or use its own research tools. Import requires the host to read attachments. App publication needs an authorized app connection. Full runs also require workflow helpers, writable task storage and worker support. Setup uses the host's OAuth, profiles, approval and scheduler facilities. Listing or reading these methods performs none of those actions. A hosted client needs a reachable authenticated MCP endpoint supplied by its operator.
-
-Verify the installation with `python tests/smoke_advisory_mcp.py` with the virtual environment on PATH. Import, persistence and scheduled analysis have the separate application requirements below.
+Register the installed `portfolio-advisory` executable as the client's stdio command. Such clients receive the two tools. A host must also support native Agent Skills to use the research instructions. App publication requires an authorized app connection. Research requires the host's evidence sources, import requires attachment access, and full runs also need writable task storage and workers. A remote client requires an authenticated reachable connection supplied by its operator.
 
 ## Included skills
 
@@ -36,36 +53,6 @@ The orchestrator and import/setup workflows expect the configured [Portfolio Ana
 
 The strategy workflow uses Markdown schema 4 (`portfolio-strategy/4`) and requires app migration `0008_users_and_portfolios`. Update the app alongside the plugin. It maintains immutable Markdown investment-plan versions and publishes a separate German daily report comparing the last successful review with current holdings and research. New statements inform observed progress; prices or weight changes do not prove trades. There is no completion/confirmation feature. Older writers receive an upgrade error.
 
-## Optional native marketplace in Codex
-
-Add the GitHub marketplace:
-
-```bash
-codex plugin marketplace add jasperberkel/portfolio-analyser-plugin
-```
-
-Start Codex, open `/plugins`, install **Portfolio Analyser**, and start a new session.
-
-## Optional native marketplace in Claude Code
-
-```bash
-claude plugin marketplace add jasperberkel/portfolio-analyser-plugin
-claude plugin install portfolio-analyser@portfolio-analyser
-```
-
-In Claude Code, skills are available under the plugin namespace, for example:
-
-```text
-/portfolio-analyser:portfolio-import
-/portfolio-analyser:market-discovery-research
-/portfolio-analyser:instrument-research
-/portfolio-analyser:valuation-thesis-research
-/portfolio-analyser:portfolio-risk-research
-/portfolio-analyser:portfolio-strategy
-/portfolio-analyser:run-analysis
-/portfolio-analyser:portfolio-analyser-setup
-```
-
 ## Import a portfolio
 
 Invoke `$portfolio-import` with the portfolio documents (Claude Code: `/portfolio-analyser:portfolio-import`). Once the consolidated snapshot and import report are successfully stored, the skill automatically continues with `run-analysis` in the same task. This applies to the first import and later uploads, with one follow-up per combined snapshot. An explicit import-only request skips the follow-up. If the analysis fails, the successful import remains stored and the result identifies the failed stage.
@@ -84,7 +71,7 @@ After installation, ask Codex or Claude Code:
 Set up Portfolio Analyser and its recurring research and briefing jobs.
 ```
 
-The optional app workflow uses native HTTP MCP and OAuth. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. Advisory-only clients can use the four tools immediately.
+The optional app workflow uses native HTTP MCP and OAuth. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. The two calculation tools run independently of this setup.
 
 ## Ask an agent to install it
 
