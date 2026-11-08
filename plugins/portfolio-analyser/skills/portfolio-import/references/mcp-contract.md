@@ -22,7 +22,7 @@ Call `publish_portfolio_snapshot_and_analysis(snapshot, positions, analysis)` wi
 }
 ```
 
-The snapshot ID is deterministic and already supplied by the builder. Do not add fields containing source filenames, account identifiers, or extracted raw text. The historical `portfolio.initial` analysis type remains unchanged for app compatibility and is also used for later imports. A retry must reuse both IDs and identical payloads. A conflicting ID is a hard failure.
+Pass the deterministic snapshot ID supplied by the builder. The service receipt's snapshot_id identifies the actual immutable stored revision; retain it for the follow-up. Do not add fields containing source filenames, account identifiers, or extracted raw text. The historical `portfolio.initial` analysis type remains unchanged for app compatibility and is also used for later imports. A retry must reuse both IDs and identical payloads. A conflicting ID is a hard failure.
 
 ## Follow-up analysis
 

@@ -32,6 +32,11 @@ def load_connection(path=CONNECTION_CONFIG):
         environment = config.get('environment')
         if environment not in ('development', 'production'):
             raise ValueError('Plugin connection environment must be development or production')
+        authentication = config.get('authentication', 'oauth')
+        if authentication not in ('local-grant', 'oauth'):
+            raise ValueError('Unknown portfolio service authentication')
+        if authentication == 'local-grant' and environment != 'development':
+            raise ValueError('Local grants are only supported in development')
         url = validate_url(config['mcp_url'])
         parsed = urlparse(url)
         if environment == 'production' and (parsed.scheme != 'https' or parsed.hostname in ('localhost', '127.0.0.1', '::1')):
@@ -65,7 +70,16 @@ def require_keyring(path):
         if os.path.exists(temporary): os.unlink(temporary)
 
 
-def commands(host, url):
+def commands(host, url, local_grant=False):
+    if local_grant:
+        parsed = urlparse(url)
+        if parsed.scheme != 'http' or parsed.hostname not in ('127.0.0.1', '::1', 'localhost'):
+            raise ValueError('Local grants require a loopback HTTP endpoint')
+        if host == 'codex':
+            return [['codex', 'mcp', 'add', NAME, '--url', url, '--bearer-token-env-var', 'TRADING_PORTFOLIO_TOKEN']]
+        return [['claude', 'mcp', 'add', '--transport', 'http', '--scope', 'user', NAME, url,
+                 '--header', 'Authorization: Bearer ${TRADING_PORTFOLIO_TOKEN}']]
+
     if host == 'codex':
         return [
             ['codex', 'mcp', 'add', NAME, '--url', url, '--oauth-client-id', 'portfolio-codex', '--oauth-resource', url],
@@ -83,11 +97,15 @@ def main():
     args = parser.parse_args()
     try:
         url = load_connection()
+        local_grant = json.loads(CONNECTION_CONFIG.read_text()).get('authentication') == 'local-grant'
+        native_commands = commands(args.host, url, local_grant)
     except ValueError as exc:
         parser.error(str(exc))
     if args.dry_run:
-        print(json.dumps(commands(args.host, url), indent=2)); return
-    if args.host == 'codex':
+        print(json.dumps(native_commands, indent=2)); return
+    if local_grant and not os.environ.get('TRADING_PORTFOLIO_TOKEN'):
+        parser.error('Start the native host with the operator-issued TRADING_PORTFOLIO_TOKEN')
+    if args.host == 'codex' and not local_grant:
         require_keyring(Path(os.environ.get('CODEX_HOME', Path.home() / '.codex')) / 'config.toml')
     # This canonical name is the one managed by this setup. The plugin itself
     # intentionally contains no MCP entry, preventing duplicate stdio/HTTP tools.
@@ -98,8 +116,8 @@ def main():
     existing = subprocess.run([args.host, 'mcp', 'get', NAME], capture_output=True, text=True)
     if existing.returncode == 0:
         subprocess.run(remove, check=True)
-    for command in commands(args.host, url): subprocess.run(command, check=True)
-    print('Native OAuth connection configured. Reload the plugin/client and verify its native tools.')
+    for command in native_commands: subprocess.run(command, check=True)
+    print('Native HTTP connection configured. Reload the host and verify its native tools.')
 
 
 if __name__ == '__main__': main()

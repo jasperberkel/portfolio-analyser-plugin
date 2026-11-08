@@ -10,7 +10,7 @@
       "name": "portfolio-analyser",
       "source": "./plugins/portfolio-analyser",
       "description": "OAuth connection, personal portfolio import, research, and recurring analysis.",
-      "version": "0.11.1",
+      "version": "0.11.2",
       "author": {
         "name": "Jasper Berkel"
       },

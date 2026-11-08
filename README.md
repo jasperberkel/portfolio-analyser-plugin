@@ -47,11 +47,11 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 
 ## Prerequisite
 
-Setup and workflow helpers require Python 3.11 or newer. Native Codex/Claude Code must support HTTP MCP, OAuth and preregistered public client IDs.
+Setup and workflow helpers require Python 3.11 or newer. The host needs native HTTP MCP and the configured service authentication. Hosted OAuth deployments also require registered client IDs.
 
-The orchestrator and import/setup workflows expect the configured [Portfolio Analyser](https://github.com/jasperberkel/portfolio-analyser) application to be running. Run the setup skill to connect using native HTTP MCP and OAuth. The plugin supplies the application address automatically; users only sign in and approve access. The client securely stores its tokens; there is no bridge, connection code, PAT or shell fallback.
+Import and analysis use a separately authorized private portfolio service. The default local connection is `http://127.0.0.1:8766/mcp`, named `portfolio_analyser`. The operator supplies the native host with an expiring grant in `TRADING_PORTFOLIO_TOKEN`. A combined import and analysis grant supports the automatic follow-up. Keep credentials out of project files and worker inputs. A production HTTPS package can use native OAuth. A remote host needs a reachable service and supported authentication.
 
-The strategy workflow uses Markdown schema 4 (`portfolio-strategy/4`) and requires app migration `0008_users_and_portfolios`. Update the app alongside the plugin. It maintains immutable Markdown investment-plan versions and publishes a separate German daily report comparing the last successful review with current holdings and research. New statements inform observed progress; prices or weight changes do not prove trades. There is no completion/confirmation feature. Older writers receive an upgrade error.
+A complete run needs the six V2 analysis tools, fresh host workers, source access and a writable private workspace. The service stores immutable Markdown plan versions, reports and their original snapshot associations. Holdings changes do not establish executed trades.
 
 ## Import a portfolio
 
@@ -71,7 +71,7 @@ After installation, ask Codex or Claude Code:
 Set up Portfolio Analyser and its recurring research and briefing jobs.
 ```
 
-The optional app workflow uses native HTTP MCP and OAuth. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. The two calculation tools run independently of this setup.
+The optional private service uses native authenticated HTTP MCP. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. The two calculation tools run independently of this setup.
 
 ## Ask an agent to install it
 
@@ -101,9 +101,9 @@ Invoke `$run-analysis` (Claude Code: `/portfolio-analyser:run-analysis`). It loa
 
 Research and portfolio-strategy skills always create drafts, including individual invocations. They receive partitioned input files and never connect to the portfolio app. The full strategy reads complete reports, not only worker summaries. The long-term plan changes only with substantive justification.
 
-The app must expose get_analysis_context, prepare_strategy_context and publish_analysis_run (migration 0007_research_v2). Update the app before migrating jobs. Existing V4 reads/writes and historical report/plan associations remain supported. `.analysis-runs/` contains ignored local progress and drafts; it is not an autonomous recovery daemon.
+The service must expose the V2 context, preparation, publication and detail tools required by the run-analysis skill. Verify a complete manual run before migrating jobs. `.analysis-runs/` contains ignored local progress and drafts; it is not an autonomous recovery daemon.
 
-The explicit graph distinguishes role, task and report. Five research tasks publish four reports: holdings and candidates merge into one instrument report. A coordinated contract change is required to extend the graph. See [orchestration](plugins/portfolio-analyser/references/orchestration.md) and [V2 contract](plugins/portfolio-analyser/references/research-contract-v2.md). The app supports V1 and V2; this plugin requires V2 and never silently downgrades.
+The explicit graph distinguishes role, task and report. Five research tasks publish four reports: holdings and candidates merge into one instrument report. A coordinated contract change is required to extend the graph. See [orchestration](plugins/portfolio-analyser/references/orchestration.md) and [V2 contract](plugins/portfolio-analyser/references/research-contract-v2.md). This plugin requires the V2 analysis contract.
 
 Shared role playbooks have native Claude adapters and an installer for managed Codex project profiles. Where native role selection is unavailable, workers load the playbooks explicitly. This fallback does not enforce tool isolation. See [host adapters](plugins/portfolio-analyser/references/agent-adapters.md).
 
@@ -111,11 +111,9 @@ Shared role playbooks have native Claude adapters and an installer for managed C
 
 Use Python 3.11+ for the plugin test suite: `python -m unittest discover -s tests`. Scripts require no provider credentials. The API vendors the pure research_contract.py file; an API parity test checks that it matches the plugin copy. Keep both copies synchronized on contract edits.
 
-Upgrade the app through migration 0007 before installing plugin 0.8.0. The four core reports share one research.core preference: existing exclusions and the strictest age limit are retained. Both Markdown and structured evidence are excluded together. Additional independent reports remain selectable. Existing schedules are not changed by the release; setup handles explicitly requested schedule migrations.
+Adapted Anthropic methods and license are documented in [attribution](plugins/portfolio-analyser/references/anthropic-sources.md).
 
-Adapted Anthropic methods and license are documented in [attribution](plugins/portfolio-analyser/references/anthropic-sources.md). No upstream agent runtime is installed.
-
-Version 0.9.0 requires the multi-user app migration `0008_users_and_portfolios`. Run the setup skill and sign in to a verified account; no address entry is needed. Existing schedules are switched only after a successful complete native analysis run.
+Existing schedules are switched only after a successful complete native analysis run.
 
 ## Application endpoint configuration
 
@@ -124,8 +122,8 @@ relative to the installed plugin, so it also works from a cache or an unrelated 
 Users do not pass a URL. `configure_mcp.py --host codex` (or `--host claude`) starts the native
 connection; `--dry-run` previews it without changing client configuration.
 
-The current package explicitly uses `environment: development` and the local app at
-`http://localhost:3300/mcp`. Before a hosted release, set `environment: production` and the
+The current package uses `environment: development`, `authentication: local-grant` and
+`http://127.0.0.1:8766/mcp`. For hosted OAuth set `authentication: oauth`, `environment: production` and the
 actual public HTTPS `mcp_url` in that same publisher-managed file. There is no hosted domain
 configured yet. Production mode rejects loopback and HTTP URLs. Invalid packages fail with a
 configuration error and never ask the user to repair them by entering an address.

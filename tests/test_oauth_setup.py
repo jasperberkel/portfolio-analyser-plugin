@@ -39,6 +39,15 @@ class OAuthSetupTests(unittest.TestCase):
         self.assertFalse((ROOT / 'bin').exists())
         self.assertFalse((ROOT / 'scripts/mcp_call.py').exists())
 
+    def test_native_grant_is_loopback_only_and_uses_a_reference(self):
+        url = 'http://127.0.0.1:8766/mcp'
+        codex = setup.commands('codex', url, True)[0]
+        self.assertEqual(codex[-2:], ['--bearer-token-env-var', 'TRADING_PORTFOLIO_TOKEN'])
+        claude = setup.commands('claude', url, True)[0]
+        self.assertEqual(claude[-1], 'Authorization: Bearer ${TRADING_PORTFOLIO_TOKEN}')
+        with self.assertRaises(ValueError):
+            setup.commands('codex', 'https://example.com/mcp', True)
+
     def test_url_validation(self):
         self.assertEqual(setup.validate_url('http://localhost:3000/mcp'), 'http://localhost:3000/mcp')
         for value in ['http://public.example/mcp', 'https://user:secret@portfolio.example/mcp', 'https://portfolio.example/mcp?token=x']:

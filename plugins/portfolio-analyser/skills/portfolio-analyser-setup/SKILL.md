@@ -5,11 +5,11 @@ description: Securely connect the installed Portfolio Analyser plugin to the Por
 
 # Portfolio Analyser Setup
 
-Connect the installed plugin through native HTTP MCP and OAuth, verify MCP, and configure recurring jobs without creating duplicates. Plugin installation alone is never authorization to connect or create schedules.
+Connect the installed plugin through native authenticated HTTP MCP, verify MCP, and configure recurring jobs without creating duplicates. Plugin installation alone is never authorization to connect or create schedules.
 
 ## Advisory access and optional app setup
 
-Read this skill through the native skills interface. Verify the separate `portfolio_exposure` and `build_portfolio_snapshot` tools through host tool discovery. The steps below enable optional account-backed workflows and schedules. These require a reachable application, its OAuth-capable client and user consent. Use the host's own controls for connection, profiles, permissions and scheduling. A hosted agent needs an authenticated reachable MCP endpoint. A local stdio command or loopback URL is usable only from its own machine.
+Read this skill through the native skills interface. Verify the separate `portfolio_exposure` and `build_portfolio_snapshot` tools through host tool discovery. The steps below enable optional account-backed workflows and schedules. These require a reachable application, its supported native authentication and user consent. Use the host's own controls for connection, profiles, permissions and scheduling. A hosted agent needs an authenticated reachable MCP endpoint. A local stdio command or loopback URL is usable only from its own machine.
 
 ## Detect the host
 
@@ -19,43 +19,19 @@ Determine the current host from the product context and available scheduling too
 - For Claude Code, read [references/claude-code.md](references/claude-code.md).
 - For other hosts, check their OAuth, scheduling and worker support first. Report missing capabilities before attempting the corresponding setup step.
 
-## Connect through native OAuth
+## Connect the private MCP service
 
-The plugin already knows the application's MCP address through the [application configuration](../../config/connection.json).
-Never ask users for the application URL, tokens, passwords or connection codes.
-Resolve the installed plugin root from this skill's location; do not derive the address from the
-working directory, browser, previous chat or another installation.
+Read [connection.json](../../config/connection.json) relative to this installed skill. The packaged local pilot uses a loopback HTTP endpoint and an expiring, operator-issued grant. The operator starts the native host with `TRADING_PORTFOLIO_TOKEN` supplied privately. Never request or print the token. Read access suffices for inspection, import permission for a snapshot with its report, and analysis permission for publishing a run. A combined grant supports the automatic import-to-analysis handoff.
 
-Run `python3 <plugin-root>/scripts/configure_mcp.py --host codex --dry-run`
-(or `--host claude`) to inspect the configured native connection without modifying anything.
-The bundled development configuration targets the current local app; production packages must
-contain their public HTTPS address. A missing or invalid configuration is a packaging error:
-report it and stop, rather than asking the user to supply a URL or trying another installation.
+Check native tool discovery first. Reuse a working, operator-configured `portfolio_analyser` connection, including a custom pilot port. For the bundled default, inspect `python3 <plugin-root>/scripts/configure_mcp.py --host codex --dry-run` (or `--host claude`). On explicit setup run it without `--dry-run`. Only replace the named entry when it belongs to this workflow. The registered command references the host environment variable by name. Never pass its value to an agent, shell command line or project file.
 
-The optional app connection is separate from the read-only advisory tools.
-Run `python3 <plugin-root>/scripts/configure_mcp.py --host codex`
-(or `--host claude`). This registers exactly one native HTTP entry named `portfolio_analyser`
-and opens the native client's OAuth browser login for the configured application.
-Only use a supported client version with native HTTP OAuth and preregistered client IDs.
-The user signs into their own verified account and explicitly allows the requested scopes.
-For Codex the script explicitly sets `mcp_oauth_credentials_store = "keyring"`.
-If the system keyring is unavailable, report this client requirement; never select plaintext storage.
+For a production package configured with HTTPS/OAuth, use the native client login, client registration and Codex keyring. The loopback pilot has its own grant mechanism. A hosted agent needs an operator-provisioned reachable authenticated service.
 
-Before changing an existing entry, inspect whether it already has the bundled URL and expected client ID.
-If it matches and its native tools work, reuse it without running setup again.
-Remove only an old Portfolio Analyser bridge entry that belongs to this plugin when upgrading.
-Do not touch unrelated MCP servers, schedules or credentials. Never inspect the OAuth token store.
-
-Verify the tools using the host's native tool discovery and `get_current_positions`.
-If tools are absent: report the server name, URL, client connection status and whether login or
-client reload is needed. If the request fails with 401, use the client's native OAuth login;
-403 means missing permission/unverified account; 503 means the auth service cannot be reached.
-No shell MCP calls, bridge, direct HTTP tool requests, PATs or environment-token fallbacks are supported.
-Do not create or switch schedules until native tools actually work in the host.
+Verify native tools and `get_current_positions`. On 401 check host credential provisioning or expiry, on permission denial check the account grant. Use native MCP for portfolio I/O. Connect workers only after the orchestrator can read the service.
 
 ## Verify workflow and install profiles
 
-Resolve `<plugin-root>/scripts/workflow.py` and run its discover command. Require run-analysis plus one strategy and the explicit V2 dependency graph with five research tasks; never infer jobs from name suffixes. Verify get_analysis_context, prepare_strategy_context and publish_analysis_run are available on the connected server. Require analysis context contract_version 2 and app migration 0008_users_and_portfolios before scheduling.
+Resolve `<plugin-root>/scripts/workflow.py` and run its discover command. Require run-analysis plus one strategy and the explicit V2 dependency graph with five research tasks; never infer jobs from name suffixes. Verify get_analysis_context, prepare_strategy_context and publish_analysis_run are available on the connected server. Verify all six Run Analysis tools, the import tools when needed, and context contract_version 2 before scheduling.
 
 For Codex, run `python3 <plugin-root>/scripts/install_agent_profiles.py <project-root>` to install/update only the two managed project profiles. Do not overwrite an unmanaged collision. Claude Code uses the plugin's bundled agents. Read [host adapters](../../references/agent-adapters.md) and disclose the instruction-based fallback when native profile selection is unavailable. Agent setup is part of an explicitly requested workflow setup, not a side effect of plugin installation.
 

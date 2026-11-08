@@ -1,6 +1,6 @@
 {
   "name": "portfolio-analyser",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Coordinate dependent market, instrument, valuation and portfolio-risk research with atomic strategy publication.",
   "author": {
     "name": "Jasper Berkel",
