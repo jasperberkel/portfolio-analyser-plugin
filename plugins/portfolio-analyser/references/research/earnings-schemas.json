@@ -1,0 +1,1526 @@
+{
+  "calendar": {
+    "$defs": {
+      "Notice": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          }
+        },
+        "required": [
+          "revision",
+          "source"
+        ],
+        "title": "Notice",
+        "type": "object"
+      },
+      "Schedule": {
+        "additionalProperties": false,
+        "properties": {
+          "period": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Period",
+            "type": "string"
+          },
+          "report_type": {
+            "enum": [
+              "quarter",
+              "half-year",
+              "year"
+            ],
+            "title": "Report Type",
+            "type": "string"
+          },
+          "certainty": {
+            "enum": [
+              "estimated",
+              "confirmed",
+              "unknown"
+            ],
+            "title": "Certainty",
+            "type": "string"
+          },
+          "day": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Day"
+          },
+          "zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Zone"
+          },
+          "precision": {
+            "default": "date",
+            "enum": [
+              "unknown",
+              "month",
+              "early_month",
+              "mid_month",
+              "late_month",
+              "window",
+              "date",
+              "approximate",
+              "exact",
+              "before_open",
+              "after_close"
+            ],
+            "title": "Precision",
+            "type": "string"
+          },
+          "window_start": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Start"
+          },
+          "window_end": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window End"
+          },
+          "wording": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Wording"
+          },
+          "local_time": {
+            "anyOf": [
+              {
+                "format": "time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Local Time"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          },
+          "feed": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Feed"
+          }
+        },
+        "required": [
+          "period",
+          "report_type",
+          "certainty",
+          "source"
+        ],
+        "title": "Schedule",
+        "type": "object"
+      },
+      "Source": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "maxLength": 2048,
+            "title": "Url",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Locator",
+            "type": "string"
+          },
+          "publisher": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publisher"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Author"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published At"
+          },
+          "published_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published On"
+          },
+          "publication_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publication Zone"
+          },
+          "accessed_at": {
+            "format": "date-time",
+            "title": "Accessed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "locator",
+          "accessed_at"
+        ],
+        "title": "Source",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "schedule": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Schedule"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "gap": {
+        "anyOf": [
+          {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Gap"
+      },
+      "published_notice": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Notice"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "title": "CalendarResult",
+    "type": "object"
+  },
+  "probe": {
+    "$defs": {
+      "Notice": {
+        "additionalProperties": false,
+        "properties": {
+          "revision": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Revision",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          }
+        },
+        "required": [
+          "revision",
+          "source"
+        ],
+        "title": "Notice",
+        "type": "object"
+      },
+      "Source": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "maxLength": 2048,
+            "title": "Url",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Locator",
+            "type": "string"
+          },
+          "publisher": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publisher"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Author"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published At"
+          },
+          "published_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published On"
+          },
+          "publication_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publication Zone"
+          },
+          "accessed_at": {
+            "format": "date-time",
+            "title": "Accessed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "locator",
+          "accessed_at"
+        ],
+        "title": "Source",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "published_notice": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Notice"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "gap": {
+        "anyOf": [
+          {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Gap"
+      }
+    },
+    "title": "ProbeResult",
+    "type": "object"
+  },
+  "preview": {
+    "$defs": {
+      "Fact": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Metric",
+            "type": "string"
+          },
+          "value": {
+            "pattern": "^-?(?:0|[1-9][0-9]{0,29})(?:\\.[0-9]{1,36})?$",
+            "title": "Value",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Currency"
+          },
+          "period": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Period",
+            "type": "string"
+          },
+          "basis": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Basis",
+            "type": "string"
+          },
+          "value_kind": {
+            "enum": [
+              "actual",
+              "consensus",
+              "guidance",
+              "assumption"
+            ],
+            "title": "Value Kind",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          },
+          "estimate_as_of": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Estimate As Of"
+          },
+          "aggregation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "median",
+                  "mean",
+                  "single",
+                  "unspecified"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Aggregation"
+          },
+          "analyst_count": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Analyst Count"
+          },
+          "range_low": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9][0-9]{0,29})(?:\\.[0-9]{1,36})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Range Low"
+          },
+          "range_high": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9][0-9]{0,29})(?:\\.[0-9]{1,36})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Range High"
+          }
+        },
+        "required": [
+          "metric",
+          "value",
+          "unit",
+          "period",
+          "basis",
+          "value_kind",
+          "source"
+        ],
+        "title": "Fact",
+        "type": "object"
+      },
+      "Perspective": {
+        "additionalProperties": false,
+        "properties": {
+          "participant": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Participant",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "management",
+              "analyst",
+              "market_commentator"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "view": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "View",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "uncertainty": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Uncertainty",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          }
+        },
+        "required": [
+          "participant",
+          "kind",
+          "view",
+          "rationale",
+          "uncertainty",
+          "source"
+        ],
+        "title": "Perspective",
+        "type": "object"
+      },
+      "Sentiment": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "found",
+              "conflicting",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "perspectives": {
+            "items": {
+              "$ref": "#/$defs/Perspective"
+            },
+            "maxItems": 15,
+            "title": "Perspectives",
+            "type": "array"
+          },
+          "limitations": {
+            "items": {
+              "maxLength": 240,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 15,
+            "title": "Limitations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "perspectives",
+          "limitations"
+        ],
+        "title": "Sentiment",
+        "type": "object"
+      },
+      "Source": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "maxLength": 2048,
+            "title": "Url",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Locator",
+            "type": "string"
+          },
+          "publisher": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publisher"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Author"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published At"
+          },
+          "published_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published On"
+          },
+          "publication_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publication Zone"
+          },
+          "accessed_at": {
+            "format": "date-time",
+            "title": "Accessed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "locator",
+          "accessed_at"
+        ],
+        "title": "Source",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "sentiment": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Sentiment"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "facts": {
+        "items": {
+          "$ref": "#/$defs/Fact"
+        },
+        "maxItems": 80,
+        "title": "Facts",
+        "type": "array"
+      },
+      "gaps": {
+        "items": {
+          "maxLength": 240,
+          "minLength": 1,
+          "type": "string"
+        },
+        "maxItems": 40,
+        "title": "Gaps",
+        "type": "array"
+      },
+      "assessment": {
+        "maxLength": 20000,
+        "minLength": 1,
+        "title": "Assessment",
+        "type": "string"
+      }
+    },
+    "required": [
+      "facts",
+      "gaps",
+      "assessment"
+    ],
+    "title": "Preview",
+    "type": "object"
+  },
+  "review": {
+    "$defs": {
+      "Perspective": {
+        "additionalProperties": false,
+        "properties": {
+          "participant": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Participant",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "management",
+              "analyst",
+              "market_commentator"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "view": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "View",
+            "type": "string"
+          },
+          "rationale": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "uncertainty": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Uncertainty",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          }
+        },
+        "required": [
+          "participant",
+          "kind",
+          "view",
+          "rationale",
+          "uncertainty",
+          "source"
+        ],
+        "title": "Perspective",
+        "type": "object"
+      },
+      "Sentiment": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "enum": [
+              "found",
+              "conflicting",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "perspectives": {
+            "items": {
+              "$ref": "#/$defs/Perspective"
+            },
+            "maxItems": 15,
+            "title": "Perspectives",
+            "type": "array"
+          },
+          "limitations": {
+            "items": {
+              "maxLength": 240,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 15,
+            "title": "Limitations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "perspectives",
+          "limitations"
+        ],
+        "title": "Sentiment",
+        "type": "object"
+      },
+      "Source": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "maxLength": 2048,
+            "title": "Url",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Locator",
+            "type": "string"
+          },
+          "publisher": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publisher"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Author"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published At"
+          },
+          "published_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published On"
+          },
+          "publication_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publication Zone"
+          },
+          "accessed_at": {
+            "format": "date-time",
+            "title": "Accessed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "locator",
+          "accessed_at"
+        ],
+        "title": "Source",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "sentiment": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Sentiment"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "outlook": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "title": "Outlook",
+        "type": "string"
+      },
+      "scenarios": {
+        "additionalProperties": {
+          "maxLength": 240,
+          "minLength": 1,
+          "type": "string"
+        },
+        "propertyNames": {
+          "enum": [
+            "positive",
+            "neutral",
+            "negative"
+          ]
+        },
+        "title": "Scenarios",
+        "type": "object"
+      },
+      "uncertainty": {
+        "maxLength": 240,
+        "minLength": 1,
+        "title": "Uncertainty",
+        "type": "string"
+      },
+      "horizon": {
+        "maxLength": 240,
+        "minLength": 1,
+        "title": "Horizon",
+        "type": "string"
+      },
+      "market_reaction": {
+        "anyOf": [
+          {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Market Reaction"
+      },
+      "reaction_source": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Source"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "reaction_window": {
+        "anyOf": [
+          {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Reaction Window"
+      },
+      "portfolio_context": {
+        "maxLength": 5000,
+        "minLength": 1,
+        "title": "Portfolio Context",
+        "type": "string"
+      }
+    },
+    "required": [
+      "outlook",
+      "scenarios",
+      "uncertainty",
+      "horizon",
+      "portfolio_context"
+    ],
+    "title": "Review",
+    "type": "object"
+  },
+  "actual": {
+    "$defs": {
+      "Actual": {
+        "additionalProperties": false,
+        "properties": {
+          "release": {
+            "enum": [
+              "partial",
+              "full",
+              "correction"
+            ],
+            "title": "Release",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published At"
+          },
+          "published_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published On"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/$defs/Fact"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Facts",
+            "type": "array"
+          },
+          "guidance": {
+            "anyOf": [
+              {
+                "maxLength": 8000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Guidance"
+          },
+          "guidance_period": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Guidance Period"
+          }
+        },
+        "required": [
+          "release",
+          "source",
+          "facts"
+        ],
+        "title": "Actual",
+        "type": "object"
+      },
+      "Fact": {
+        "additionalProperties": false,
+        "properties": {
+          "metric": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Metric",
+            "type": "string"
+          },
+          "value": {
+            "pattern": "^-?(?:0|[1-9][0-9]{0,29})(?:\\.[0-9]{1,36})?$",
+            "title": "Value",
+            "type": "string"
+          },
+          "unit": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Currency"
+          },
+          "period": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Period",
+            "type": "string"
+          },
+          "basis": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Basis",
+            "type": "string"
+          },
+          "value_kind": {
+            "enum": [
+              "actual",
+              "consensus",
+              "guidance",
+              "assumption"
+            ],
+            "title": "Value Kind",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/$defs/Source"
+          },
+          "estimate_as_of": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Estimate As Of"
+          },
+          "aggregation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "median",
+                  "mean",
+                  "single",
+                  "unspecified"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Aggregation"
+          },
+          "analyst_count": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Analyst Count"
+          },
+          "range_low": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9][0-9]{0,29})(?:\\.[0-9]{1,36})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Range Low"
+          },
+          "range_high": {
+            "anyOf": [
+              {
+                "pattern": "^-?(?:0|[1-9][0-9]{0,29})(?:\\.[0-9]{1,36})?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Range High"
+          }
+        },
+        "required": [
+          "metric",
+          "value",
+          "unit",
+          "period",
+          "basis",
+          "value_kind",
+          "source"
+        ],
+        "title": "Fact",
+        "type": "object"
+      },
+      "Source": {
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "maxLength": 2048,
+            "title": "Url",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "locator": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Locator",
+            "type": "string"
+          },
+          "publisher": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publisher"
+          },
+          "author": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Author"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published At"
+          },
+          "published_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Published On"
+          },
+          "publication_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Publication Zone"
+          },
+          "accessed_at": {
+            "format": "date-time",
+            "title": "Accessed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "title",
+          "locator",
+          "accessed_at"
+        ],
+        "title": "Source",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "actual": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Actual"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "no_match": {
+        "anyOf": [
+          {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "No Match"
+      },
+      "unverified_release": {
+        "anyOf": [
+          {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Unverified Release"
+      }
+    },
+    "title": "ActualResult",
+    "type": "object"
+  }
+}
