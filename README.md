@@ -36,7 +36,7 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 
 ## Included skills
 
-- `portfolio-import`: import portfolio documents with their report and continue to analysis when separately authorized
+- `portfolio-import`: import portfolio documents with their report and continue to analysis with the analysis permission
 - `market-discovery-research`: portfolio-independent market radar and up to eight preliminary candidates
 - `instrument-research`: facts for assigned holdings or new candidates, with asset-specific evidence
 - `valuation-thesis-research`: comparable valuation and durable thesis checks after instrument research
@@ -49,13 +49,13 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 
 Setup and workflow helpers require Python 3.11 or newer. The host needs native HTTP MCP and the configured service authentication. Browser setup requires a reachable OAuth issuer and compatible client registration.
 
-Import and analysis use a separately authorized private portfolio service. The default local connection is `http://127.0.0.1:8766/mcp`, named `portfolio_analyser`. Ask the host “Richte das Trading-Paket ein”. The existing setup skill starts personal browser sign-in, requesting read and import together. The browser confirms completion. Publishing an analysis or a plan requires separate consent. A remote host needs a reachable service endpoint.
+Import and analysis use a separately authorized private portfolio service. The default local connection is `http://127.0.0.1:8766/mcp`, named `portfolio_analyser`. Ask the host “Richte das Trading-Paket ein”. The existing setup skill starts personal browser sign-in, requesting read, import and publication of analysis reports and investment plans together. The browser confirms completion. A narrower existing grant needs explicit consent before it gains any additional right. A remote host needs a reachable service endpoint.
 
 A complete run needs the six V2 analysis tools, fresh host workers, source access and a writable private workspace. The service stores immutable Markdown plan versions, reports and their original snapshot associations. Holdings changes do not establish executed trades.
 
 ## Import a portfolio
 
-Invoke `$portfolio-import` with the portfolio documents (Claude Code: `/portfolio-analyser:portfolio-import`). Once the consolidated snapshot and import report are successfully stored, the skill can continue with `run-analysis` in the same task when the client has separate analysis consent. This applies to the first import and later uploads, with one follow-up per combined snapshot. An explicit import-only request skips the follow-up. If the analysis fails, the successful import remains stored and the result identifies the failed stage.
+Invoke `$portfolio-import` with the portfolio documents (Claude Code: `/portfolio-analyser:portfolio-import`). Once the consolidated snapshot and import report are successfully stored, the skill can continue with `run-analysis` in the same task when the client has analysis permission. This applies to the first import and later uploads, with one follow-up per combined snapshot. An explicit import-only request skips the follow-up. If the analysis fails, the successful import remains stored and the result identifies the failed stage.
 
 ## Research and data access
 

@@ -42,7 +42,9 @@ class OAuthSetupTests(unittest.TestCase):
     def test_reuse_and_upgrade_never_remove_a_connection(self):
         url = 'http://127.0.0.1:8766/mcp'
         plan = setup.commands('codex', url)
-        self.assertEqual(plan[1][-2:], ['--scopes', 'portfolio:read,portfolio:import'])
+        configured = json.loads((ROOT / 'config/connection.json').read_text())['setup_scopes']
+        self.assertEqual(configured, ['portfolio:read', 'portfolio:import', 'portfolio:analyse'])
+        self.assertEqual(plan[1][-2:], ['--scopes', ','.join(configured)])
         info = lambda **fields: json.dumps({'transport': {'url': url, **fields}})
         self.assertEqual(setup.remaining_commands('codex', info(), url, False, plan), plan[1:])
         self.assertEqual(setup.remaining_commands('codex', info(bearer_token_env_var='TRADING_PORTFOLIO_TOKEN'),

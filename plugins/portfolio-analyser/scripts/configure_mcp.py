@@ -83,7 +83,7 @@ def commands(host, url, local_grant=False):
     if host == 'codex':
         return [
             ['codex', 'mcp', 'add', NAME, '--url', url, '--oauth-resource', url],
-            ['codex', 'mcp', 'login', NAME, '--scopes', 'portfolio:read,portfolio:import'],
+            ['codex', 'mcp', 'login', NAME, '--scopes', 'portfolio:read,portfolio:import,portfolio:analyse'],
         ]
     return [
         ['claude', 'mcp', 'add', '--transport', 'http', '--scope', 'user', NAME, url],

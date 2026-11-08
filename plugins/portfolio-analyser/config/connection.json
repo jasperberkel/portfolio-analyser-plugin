@@ -4,7 +4,8 @@
   "mcp_url": "http://127.0.0.1:8766/mcp",
   "setup_scopes": [
     "portfolio:read",
-    "portfolio:import"
+    "portfolio:import",
+    "portfolio:analyse"
   ],
   "mcp_name": "portfolio_analyser"
 }

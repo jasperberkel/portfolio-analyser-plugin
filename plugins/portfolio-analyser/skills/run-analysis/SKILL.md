@@ -5,7 +5,7 @@ description: Run the complete Portfolio Analyser workflow by loading app context
 
 # Run Analysis
 
-Own the full workflow and all Portfolio Analyser I/O. Invoking this skill, including the automatic handoff from portfolio-import after confirmed publication, authorizes publishing one complete analysis package unless the user requests a dry run or import only. Research and strategy workers only create drafts. Do not delegate app publication.
+Own the full workflow and all Portfolio Analyser I/O. Invoking this skill, including the automatic handoff from portfolio-import after confirmed publication, authorizes publishing one complete analysis package unless the user requests a dry run or import only. Reuse the personal connection from full setup for publication and readback. Normal runs do not start a login. If an older grant lacks `portfolio:analyse`, gain explicit browser consent before publishing. Research and strategy workers only create drafts. Do not delegate app publication.
 
 ## Preflight and input
 
