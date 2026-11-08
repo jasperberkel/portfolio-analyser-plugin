@@ -82,12 +82,32 @@ def commands(host, url, local_grant=False):
 
     if host == 'codex':
         return [
-            ['codex', 'mcp', 'add', NAME, '--url', url, '--oauth-client-id', 'portfolio-codex', '--oauth-resource', url],
+            ['codex', 'mcp', 'add', NAME, '--url', url, '--oauth-resource', url],
+            ['codex', 'mcp', 'login', NAME, '--scopes', 'portfolio:read,portfolio:import'],
         ]
     return [
-        ['claude', 'mcp', 'add', '--transport', 'http', '--scope', 'user', '--client-id', 'portfolio-claude', NAME, url],
+        ['claude', 'mcp', 'add', '--transport', 'http', '--scope', 'user', NAME, url],
         ['claude', 'mcp', 'login', NAME],
     ]
+
+
+def remaining_commands(host, existing_config, url, local_grant, planned):
+    """Reuse an entry at this URL, or upgrade only our own legacy token reference."""
+    if host == 'codex':
+        transport = json.loads(existing_config).get('transport', {})
+        token_ref = transport.get('bearer_token_env_var')
+        if transport.get('url') == url:
+            if token_ref == ('TRADING_PORTFOLIO_TOKEN' if local_grant else None):
+                return planned[1:]
+            if not local_grant and token_ref == 'TRADING_PORTFOLIO_TOKEN':
+                return planned[:1]
+    elif url in existing_config.split():
+        if local_grant:
+            if 'TRADING_PORTFOLIO_TOKEN' in existing_config:
+                return []
+        elif 'Authorization:' not in existing_config:
+            return planned[1:]
+    raise ValueError('A different connection already owns this name. Review its existing configuration.')
 
 
 def main():
@@ -102,21 +122,28 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
     if args.dry_run:
-        print(json.dumps(native_commands, indent=2)); return
+        fresh = native_commands[:1] if args.host == 'codex' and not local_grant else native_commands
+        print(json.dumps(fresh, indent=2))
+        return
     if local_grant and not os.environ.get('TRADING_PORTFOLIO_TOKEN'):
         parser.error('Start the native host with the operator-issued TRADING_PORTFOLIO_TOKEN')
     if args.host == 'codex' and not local_grant:
         require_keyring(Path(os.environ.get('CODEX_HOME', Path.home() / '.codex')) / 'config.toml')
-    # This canonical name is the one managed by this setup. The plugin itself
-    # intentionally contains no MCP entry, preventing duplicate stdio/HTTP tools.
-    remove = [args.host, 'mcp', 'remove', NAME]
-    if args.host == 'claude': remove += ['--scope', 'user']
-    # Native CLIs keep OAuth storage and browser login entirely in the client.
-    # Remove is idempotent; a missing entry is harmless, other errors are not.
-    existing = subprocess.run([args.host, 'mcp', 'get', NAME], capture_output=True, text=True)
+    inspect_command = [args.host, 'mcp', 'get', NAME]
+    if args.host == 'codex':
+        inspect_command.append('--json')
+    existing = subprocess.run(inspect_command, capture_output=True, text=True)
     if existing.returncode == 0:
-        subprocess.run(remove, check=True)
-    for command in native_commands: subprocess.run(command, check=True)
+        try:
+            native_commands = remaining_commands(args.host, existing.stdout, url, local_grant, native_commands)
+        except ValueError as exc:
+            parser.error(str(exc))
+    elif args.host == 'codex' and not local_grant:
+        # This CLI starts OAuth while adding a new HTTP entry. Login explicitly only
+        # for an existing entry that the host determined still needs authorization.
+        native_commands = native_commands[:1]
+    for command in native_commands:
+        subprocess.run(command, check=True)
     print('Native HTTP connection configured. Reload the host and verify its native tools.')
 
 

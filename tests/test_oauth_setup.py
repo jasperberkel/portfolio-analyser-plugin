@@ -39,6 +39,17 @@ class OAuthSetupTests(unittest.TestCase):
         self.assertFalse((ROOT / 'bin').exists())
         self.assertFalse((ROOT / 'scripts/mcp_call.py').exists())
 
+    def test_reuse_and_upgrade_never_remove_a_connection(self):
+        url = 'http://127.0.0.1:8766/mcp'
+        plan = setup.commands('codex', url)
+        self.assertEqual(plan[1][-2:], ['--scopes', 'portfolio:read,portfolio:import'])
+        info = lambda **fields: json.dumps({'transport': {'url': url, **fields}})
+        self.assertEqual(setup.remaining_commands('codex', info(), url, False, plan), plan[1:])
+        self.assertEqual(setup.remaining_commands('codex', info(bearer_token_env_var='TRADING_PORTFOLIO_TOKEN'),
+                                                 url, False, plan), plan[:1])
+        with self.assertRaises(ValueError):
+            setup.remaining_commands('codex', info(bearer_token_env_var='OTHER_SECRET'), url, False, plan)
+
     def test_native_grant_is_loopback_only_and_uses_a_reference(self):
         url = 'http://127.0.0.1:8766/mcp'
         codex = setup.commands('codex', url, True)[0]

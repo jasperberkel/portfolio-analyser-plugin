@@ -1,33 +1,20 @@
 ---
 name: portfolio-analyser-setup
-description: Securely connect the installed Portfolio Analyser plugin to the Portfolio Analyser app and configure one recurring run-analysis job and shared agent profiles. Use when the user asks to set up, connect, prepare, schedule, or automate the plugin in Codex or Claude Code; do not use to run reports immediately or install the app itself.
+description: Set up or connect the Trading-Paket and its personal portfolio service. Use for “Richte das Trading-Paket ein”, account connection, and explicitly requested recurring analysis jobs.
 ---
 
 # Portfolio Analyser Setup
 
 Connect the installed plugin through native authenticated HTTP MCP, verify MCP, and configure recurring jobs without creating duplicates. Plugin installation alone is never authorization to connect or create schedules.
 
-## Advisory access and optional app setup
+## Personal connection
 
-Read this skill through the native skills interface. Verify the separate `portfolio_exposure` and `build_portfolio_snapshot` tools through host tool discovery. The steps below enable optional account-backed workflows and schedules. These require a reachable application, its supported native authentication and user consent. Use the host's own controls for connection, profiles, permissions and scheduling. A hosted agent needs an authenticated reachable MCP endpoint. A local stdio command or loopback URL is usable only from its own machine.
+“Richte das Trading-Paket ein” requests a personal connection now. The user approves the scopes in their own browser. For normal setup, finish after connecting. Only configure research profiles or recurring jobs if the user asked for them.
 
-## Detect the host
-
-Determine the current host from the product context and available scheduling tools. Do not ask when it is unambiguous.
-
-- For Codex or ChatGPT desktop scheduling, read [references/codex.md](references/codex.md).
-- For Claude Code, read [references/claude-code.md](references/claude-code.md).
-- For other hosts, check their OAuth, scheduling and worker support first. Report missing capabilities before attempting the corresponding setup step.
-
-## Connect the private MCP service
-
-Read [connection.json](../../config/connection.json) relative to this installed skill. The packaged local pilot uses a loopback HTTP endpoint and an expiring, operator-issued grant. The operator starts the native host with `TRADING_PORTFOLIO_TOKEN` supplied privately. Never request or print the token. Read access suffices for inspection, import permission for a snapshot with its report, and analysis permission for publishing a run. A combined grant supports the automatic import-to-analysis handoff.
-
-Check native tool discovery first. Reuse a working, operator-configured `portfolio_analyser` connection, including a custom pilot port. For the bundled default, inspect `python3 <plugin-root>/scripts/configure_mcp.py --host codex --dry-run` (or `--host claude`). On explicit setup run it without `--dry-run`. Only replace the named entry when it belongs to this workflow. The registered command references the host environment variable by name. Never pass its value to an agent, shell command line or project file.
-
-For a production package configured with HTTPS/OAuth, use the native client login, client registration and Codex keyring. The loopback pilot has its own grant mechanism. A hosted agent needs an operator-provisioned reachable authenticated service.
-
-Verify native tools and `get_current_positions`. On 401 check host credential provisioning or expiry, on permission denial check the account grant. Use native MCP for portfolio I/O. Connect workers only after the orchestrator can read the service.
+1. Use the current host's native tool discovery. The personal server is `portfolio_analyser`; the separate `portfolio` tools calculate locally. If the personal read tool is available, call `get_current_positions(check_setup_access=true)` once when the advertised schema supports it, otherwise call it without arguments. Reuse the working connection, including an empty portfolio, when its granted scopes include both read and import. If the status shows only read, initiate the host's permission upgrade instead of claiming full setup. Avoid displaying positions during setup.
+2. On a fresh connection, immediately invoke the host-provided account **connect** action for that server (one call, no arguments). For hosts offering namespaced tools this can be `portfolio_analyser__connect`. Do not ask the user to start it or run a command. Deliver the resulting private, clickable browser sign-in URL only to the requesting user in a direct chat. Never paste callback URLs, tokens or credentials. Describe the requested permissions: read holdings/history and save uploaded statements with their import report. The browser callback finishes setup and displays the result. Tell the user they can close that page after success. Never ask them to send “Fertig”, retry a command, or reply to complete setup. Tool availability on the next normal request suffices. Do not claim success before the callback.
+3. For standalone Codex or Claude Code without a connect action, use the installed connection settings and the host's native OAuth login flow. Prefer the active client's browser sign-in API. The bundled `scripts/configure_mcp.py --host codex|claude` supports CLI hosts. Run it on the user's behalf only when needed, accepting consent exclusively in the user's browser. An existing working connection is reused. Never remove a connection, copy a token, or use a shared operator identity as a fallback.
+4. Full setup requests `portfolio:read` and `portfolio:import` together. Publishing analyses and plans needs a separate explicit `portfolio:analyse` grant. On denial or unavailable connectivity, report the specific state without retrying or publishing anything.
 
 ## Verify workflow and install profiles
 

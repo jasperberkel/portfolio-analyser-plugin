@@ -1,5 +1,10 @@
 {
   "environment": "development",
-  "authentication": "local-grant",
-  "mcp_url": "http://127.0.0.1:8766/mcp"
+  "authentication": "oauth",
+  "mcp_url": "http://127.0.0.1:8766/mcp",
+  "setup_scopes": [
+    "portfolio:read",
+    "portfolio:import"
+  ],
+  "mcp_name": "portfolio_analyser"
 }
