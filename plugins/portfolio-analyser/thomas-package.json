@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "id": "portfolio-analyser",
+  "local": {
+    "server": "portfolio",
+    "command": "portfolio-advisory"
+  },
+  "personal": "config/connection.json",
+  "wake": "scripts/earnings_wake.mjs",
+  "migration": {
+    "routes": "earnings.json",
+    "receiptPrefix": "portfolio-earnings:",
+    "store": "portfolio-advisory",
+    "command": {
+      "command": "/opt/advisory/bin/python",
+      "args": [
+        "/opt/portfolio/scripts/advisory_mcp.py"
+      ]
+    }
+  }
+}

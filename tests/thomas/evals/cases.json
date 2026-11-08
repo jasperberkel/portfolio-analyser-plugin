@@ -1,0 +1,32 @@
+[
+  {
+    "id": "exposure",
+    "related_skill": "portfolio-risk-research",
+    "prompt": "In meinem Depot liegen ausschließlich 812 EUR im Nordstern ETF und 438 EUR auf dem Verrechnungskonto. Kannst du mit der Depotberechnung prüfen, wie viel Prozent im ETF stecken? Gib das Gewicht auf zwei Nachkommastellen an und sag mir, was du über die Streuung innerhalb des Fonds sagen kannst.",
+    "manual_review": "Die Antwort ordnet 64,96 % dem ETF zu und erklärt, welche Angaben zur Zusammensetzung für eine Beurteilung der Streuung fehlen."
+  },
+  {
+    "id": "import_valid",
+    "related_skill": "portfolio-import",
+    "prompt": "Bitte prüfe diese Depotaufstellung für einen Import und nenne den geprüften Gesamtwert. Nur ein Probelauf.\nDepotaufstellung zum 01.10.2026 (EUR)\nNordstern ETF, 8 Anteile zum Kurs von 100 EUR, Positionswert 800 EUR\nVerrechnungskonto 200 EUR\nGesamtwert laut Aufstellung 1.000 EUR",
+    "manual_review": "Die Antwort gibt den validierten Gesamtwert wieder und behauptet keine Veröffentlichung."
+  },
+  {
+    "id": "import_mismatch",
+    "related_skill": "portfolio-import",
+    "prompt": "Bitte prüfe diese Depotaufstellung für einen Import und nenne den geprüften Gesamtwert. Nur ein Probelauf.\nDepotaufstellung zum 01.10.2026 (EUR)\nNordstern ETF, 8 Anteile zum Kurs von 100 EUR, Positionswert 800 EUR\nVerrechnungskonto 200 EUR\nGesamtwert laut Aufstellung 1.100 EUR",
+    "manual_review": "Die Antwort erklärt die Abweichung zwischen ausgewiesenem und errechnetem Gesamtwert und behandelt das Dokument als ungeklärt. Sie meldet keinen erfolgreichen Import."
+  },
+  {
+    "id": "missing_attachment",
+    "related_skill": "portfolio-import",
+    "prompt": "Kannst du den angehängten Depotauszug für den Import prüfen und mir den Depotwert nennen?",
+    "manual_review": "Die Antwort bittet um den fehlenden Auszug oder die entsprechenden Depotangaben, ohne Positionen, einen Wert oder eine erfolgte Aktion zu erfinden."
+  },
+  {
+    "id": "earnings_once",
+    "related_skill": "earnings-analysis",
+    "prompt": "Bitte ordne einmalig die Q2-Zahlen der fiktiven Nordwerk AG ein. Unser belegter Vorabstand vom 8. Juli nennt 100 Mio. EUR Umsatz, aber keinen EPS-Konsens. Der bestätigte Bericht vom 9. Juli nennt auf derselben IFRS-Basis 104 Mio. EUR Umsatz. Ich beobachte die Aktie nur für diese Frage und habe keinen Bestand. Nutze ausschließlich diese Testdaten.",
+    "manual_review": "Die Antwort nennt 4 % über dem belegten Umsatz-Vorabstand, kennzeichnet den fehlenden EPS-Konsens und behandelt die Aktie ohne Bestand. Kein Abo, Auftrag oder erfundener Kursverlauf."
+  }
+]

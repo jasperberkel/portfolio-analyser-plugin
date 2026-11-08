@@ -7,5 +7,6 @@
     "portfolio:import",
     "portfolio:analyse"
   ],
-  "mcp_name": "portfolio_analyser"
+  "mcp_name": "portfolio_analyser",
+  "requestTimeoutMs": 180000
 }
