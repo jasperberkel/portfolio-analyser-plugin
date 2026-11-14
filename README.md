@@ -140,7 +140,7 @@ Plain `git push` uses the pre-push check and rejects a stale version. Run `git p
 
 ### Thomas installation and monitoring
 
-Build the wheel with `python3 -m pip wheel --no-deps . -w /tmp/trading-wheels`. In the Thomas checkout, set `THOMAS_CONNECTOR_PORT=8766` and `THOMAS_CONNECTOR_VOLUME=local-mcp-connectors` in the environment before running Compose or updating an existing local setup. Run `python3 infrastructure/always-on/update_package.py --wheel /path/to/the.whl`. The setup skill binds this package through the dashboard. Standalone clients continue to discover the native skills and MCP descriptors.
+Build the wheel with `python3 -m pip wheel --no-deps . -w /tmp/trading-wheels`. In the Thomas checkout, set `THOMAS_CONNECTOR_PORT=8766` and `THOMAS_CONNECTOR_VOLUME=local-mcp-connectors` in the environment before running Compose or updating an existing local setup. Run `python3 infrastructure/always-on/update_package.py --wheel /path/to/the.whl`. The setup skill binds this package to the requester’s verified private conversation. Standalone clients continue to discover the native skills and MCP descriptors.
 
 The wheel owns the monitoring workflow in `scripts/earnings_wake.mjs`, including due checks, research, formatting, delivery preparation and acknowledgement. The personal service checks authority and stores the result. Migration preserves existing private chat IDs and the transcript idempotency keys used before 0.12.1.
 
