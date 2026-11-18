@@ -6,11 +6,18 @@ This is the single provider/tool routing reference for all research skills. It i
 
 Public sources are the default. No premium financial connector is required or installed by this workflow. Use the host's available web search/fetch tools to find and read primary issuer filings, investor-relations releases, fund issuer holdings/product documents, central-bank/statistical publications and official protocol records. Reputable independent reporting may establish contrary evidence. The app's portfolio MCP server is not a research data provider and remains orchestrator-only.
 
+## Public source guidance
+
+- **SEC EDGAR** ([filing search](https://www.sec.gov/search-filings)): Prefer the original filings for SEC-reporting issuers when checking reported financials and material corporate disclosures. Use the relevant annual, quarterly or current report (for example 10-K, 10-Q, 8-K, 20-F or 6-K), checking issuer identity, reporting period, filing date and amendments. Cite the specific filing, not the search page. For issuers outside this coverage, use their investor-relations publications and applicable regulator or exchange disclosures.
+- **Yahoo Finance** ([news](https://finance.yahoo.com/news/)): Use it to discover relevant company and market news. Identify the article's actual publisher and distinguish editorial reporting, opinion and issuer press releases. Open the article rather than relying on its headline; verify decision-relevant factual claims against the original filing, company announcement or other appropriate primary source where available. If verification is unavailable, attribute the claim and retain the uncertainty. A syndicated copy is not independent corroboration, and a newly published article about unchanged facts is not a new development.
+
+These are concrete starting points, not an exhaustive source list or mandatory calls on every run. Apply the research cutoff and existing event ownership rules; this guidance does not configure a feed or start monitoring.
+
 ## Optional native MCP connections
 
 When a connection has been configured and authenticated in the host, inspect its actually available tools and their input schemas. Choose by required dataset, coverage, period and access rights, not merely the presence of a server. Call its native tools directly. Do not invent tool names, use the portfolio MCP server to proxy it, install software, buy access or create API credential scripts.
 
-Maintain provider-specific instructions only in this section. Example future mapping (not an active dependency): Daloopa can identify companies with `discover_companies`, discover series with `discover_company_series`, retrieve values with `get_company_fundamentals`, and retrieve documents with `discover_company_documents` / `get_document_content`. Verify the connected server exposes these tools and inspect their schemas before use. This example does not guarantee a licensed dataset or host access.
+Maintain native MCP provider-specific instructions only in this section. Example future mapping (not an active dependency): Daloopa can identify companies with `discover_companies`, discover series with `discover_company_series`, retrieve values with `get_company_fundamentals`, and retrieve documents with `discover_company_documents` / `get_document_content`. Verify the connected server exposes these tools and inspect their schemas before use. This example does not guarantee a licensed dataset or host access.
 
 For a future provider add: supported datasets/assets; configured server and actual tool names; minimal call sequence; identifier/period/unit conventions; limitations and fallback. Keep connection URLs and host connection settings in native MCP configuration; never put credentials here. Update Claude/Codex research-profile tool permissions during connector setup. A Markdown instruction cannot grant runtime tool access. Keep optional providers optional in dependency declarations.
 
