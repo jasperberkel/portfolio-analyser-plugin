@@ -1,0 +1,16 @@
+name: Request package verification
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['README.md', 'docs/**']
+permissions: {}
+jobs:
+  request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request a new check in the private backend
+        env:
+          GH_TOKEN: ${{ secrets.PACKAGE_RELEASE_DISPATCH }}
+        run: |
+          gh workflow run release.yml --repo jasperberkel/trading-portfolio-service --ref main -f skills_sha="$GITHUB_SHA"
+          echo "Requested private verification for $GITHUB_SHA." >> "$GITHUB_STEP_SUMMARY"
