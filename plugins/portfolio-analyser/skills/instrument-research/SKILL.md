@@ -16,3 +16,5 @@ For a standalone request use explicitly supplied data and produce a draft only. 
 ## Datenzugriff
 
 Before research read the shared [connector reference](../../references/research/connectors.md) and [evidence policy](../../references/research/evidence.md). Choose suitable tools available in this host. Public sources are the working default; optional native MCP access is configured separately. Missing decisive data remain explicit gaps, not invented facts.
+
+For supplied structured fundamental or screening data, use the [pure investment tools](../../references/research/structured-tools.md). Preserve their point-in-time bounds and coverage; they do not replace source research.

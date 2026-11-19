@@ -417,6 +417,7 @@ def accept_strategy(folder, value):
                 "strategy",
                 "expected_plan_version",
                 "plan_update",
+                "proposal",
             },
             "Unknown fields",
         )
@@ -454,7 +455,7 @@ def accept_strategy(folder, value):
         if value.get("plan_update"):
             update = value["plan_update"]
             require(
-                set(update) == {"content_markdown", "change_reason"},
+                {"content_markdown", "change_reason"} <= set(update) <= {"content_markdown", "change_reason", "allocation_rules"},
                 "Invalid plan update",
             )
             for key, limit in [
@@ -487,6 +488,8 @@ def publication(folder):
             for k in ("evidence_fingerprint", "strategy", "expected_plan_version")
         }
     )
+    if "proposal" in strategy:
+        result["proposal"] = strategy["proposal"]
     if strategy.get("plan_update"):
         result["plan_update"] = strategy["plan_update"]
     packet(result)

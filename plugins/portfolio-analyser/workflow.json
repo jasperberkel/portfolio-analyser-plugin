@@ -8,7 +8,7 @@
       "depends_on": [],
       "produces": "market.discovery",
       "payload_type": "market",
-      "methodology_revision": "1"
+      "methodology_revision": "2"
     },
     {
       "task_id": "holdings",
@@ -17,7 +17,7 @@
       "depends_on": [],
       "produces": "instrument.research",
       "payload_type": "instruments",
-      "methodology_revision": "1"
+      "methodology_revision": "2"
     },
     {
       "task_id": "candidates",
@@ -28,7 +28,7 @@
       ],
       "produces": "instrument.research",
       "payload_type": "instruments",
-      "methodology_revision": "1"
+      "methodology_revision": "2"
     },
     {
       "task_id": "valuation",
@@ -40,7 +40,7 @@
       ],
       "produces": "valuation.thesis",
       "payload_type": "valuation",
-      "methodology_revision": "1"
+      "methodology_revision": "2"
     },
     {
       "task_id": "risk",
@@ -51,7 +51,7 @@
       ],
       "produces": "portfolio.risk",
       "payload_type": "risk",
-      "methodology_revision": "1"
+      "methodology_revision": "2"
     },
     {
       "task_id": "strategy",
@@ -66,7 +66,7 @@
       ],
       "produces": "portfolio.strategy",
       "payload_type": "strategy",
-      "methodology_revision": "1"
+      "methodology_revision": "2"
     }
   ]
 }

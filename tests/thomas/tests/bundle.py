@@ -17,7 +17,7 @@ from install_package import stage
 
 TOOL = "portfolio__portfolio_exposure"
 NATIVE_SKILLS = {
-    "earnings-analysis", "earnings-monitor", "instrument-research", "market-discovery-research", "portfolio-analyser-setup", "portfolio-import",
+    "earnings-analysis", "earnings-monitor", "investment-monitor", "instrument-research", "market-discovery-research", "portfolio-analyser-setup", "portfolio-import",
     "portfolio-risk-research", "portfolio-strategy", "run-analysis", "valuation-thesis-research",
 }
 POSITIONS = {
@@ -180,7 +180,7 @@ def main(wheel, previous=None):
         calls = turn(http, "bundle-only")
         offered, values, _ = calls[-1]
         assert {name for name in offered if name.startswith("portfolio__")} == {
-            "portfolio__build_portfolio_snapshot", TOOL,
+            "portfolio__build_portfolio_snapshot", TOOL, "portfolio__normalize_company_facts", "portfolio__screen_opportunities", "portfolio__evaluate_portfolio_proposal",
         }, sorted(offered)
         assert len(values) == len(http.tool_calls), (offered, len(values))
         assert "publish_portfolio_snapshot_and_analysis" in values[0], values[0][:800]

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { createHash } from "node:crypto";
 
 export async function researchInstructions(pkg, phase) {
+  if (phase === "investment") return readFile(join(pkg, "references/research/investment-monitor.md"), "utf8");
   const skill = ["calendar", "probe"].includes(phase) ? "earnings-monitor" : "earnings-analysis";
   const files = [
     "skills/" + skill + "/SKILL.md",
@@ -24,8 +25,8 @@ export async function researchTask({
   validate,
   now = () => new Date().toISOString(),
 }) {
-  const { phase, identity, schedule, known_events, candidate, research_cutoff } = task;
-  const publicTask = { phase, identity, schedule, known_events, candidate, research_cutoff };
+  const { phase, identity, schedule, known_events, candidate, research_cutoff, theses } = task;
+  const publicTask = { phase, identity, schedule, known_events, candidate, research_cutoff, theses };
   const sources = task.sources?.documents || [];
   const evidence = [];
   const queries = [],
@@ -59,6 +60,8 @@ export async function researchTask({
     }
   };
   const policy = {
+    investment:
+      "Search primary sources for material changes to each assigned instrument's long-term thesis since known_events. Reuse the same event_key for the same underlying event and corrections. Exclude pure price/volume signals and unchanged syndicated news. Read every cited source. Return observations, thesis effects and concrete review reasons, no orders, target weights or plan revisions. Account for every instrument, including source gaps.",
     calendar:
       "Search official IR/financial calendar for the next results at cutoff. Verify legal issuer and reporting period, not a call or meeting. Retain source language and precision. If the upcoming period is ambiguous return a gap.",
     probe:
@@ -93,7 +96,7 @@ export async function researchTask({
         typeof query !== "string" ||
         !query.trim() ||
         queries.includes(query) ||
-        queries.length >= (phase === "probe" ? 1 : 6)
+        queries.length >= (phase === "probe" ? 1 : phase === "investment" ? 12 : 6)
       )
         continue;
       queries.push(query.slice(0, 360));
@@ -109,7 +112,7 @@ export async function researchTask({
     }
     for (const url of (choice.urls || []).slice(0, 4)) {
       if (probeClosed()) break;
-      if (!urls.has(url) || attempted.has(url) || attempted.size >= (phase === "probe" ? 2 : 9)) continue;
+      if (!urls.has(url) || attempted.has(url) || attempted.size >= (phase === "probe" ? 2 : phase === "investment" ? 16 : 9)) continue;
       progressed = true;
       attempted.add(url);
       try {
@@ -129,7 +132,7 @@ export async function researchTask({
       result: { gap: "Das lokale Veröffentlichungsfenster ist beendet." },
       web_trace: { queries, gaps, opened: [] },
     };
-  if (["calendar", "probe", "review", "preview"].includes(phase) && !queries.length)
+  if (["calendar", "probe", "review", "preview", "investment"].includes(phase) && !queries.length)
     throw Error("Model did not attempt required source discovery");
   const finalRequest = {
     instruction: policy,

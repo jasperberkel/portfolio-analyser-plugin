@@ -23,3 +23,7 @@ Inspect the returned schema, extract only decision-relevant evidence into the re
 ## Earnings adapters
 
 The public package owns `scripts/earnings_sources.py` and `scripts/earnings_packets.py`. The private service vendors these two modules to run its same-day probes without a model or a public checkout at runtime. Use compatible supplied evidence and actively search/open missing issuer or analyst evidence through the isolated host; the private service owns eligibility, quotas, retries and all writes. An individual research request does not start the monitor. Source configuration is operator-owned. The SNB adapter requires explicit non-commercial mode and attribution. EDGAR needs a declared user agent; report access failures. Approved Atom/RSS sources can supply separate calendar and expectation URLs. Missing consensus is a gap. OpenFIGI is limited to identifying explicitly requested common stocks.
+
+## Structured fundamentals and screening
+
+The package supplies pure normalization and comparison tools described in [structured tools](structured-tools.md). Fetch companyfacts through supported isolated public access with the required SEC User-Agent, then pass the actual JSON and confirmed CIK. No premium provider, global market feed or unofficial Yahoo adapter is installed. If structured source access is unavailable, retain issuer-document research and state the screening coverage gap.

@@ -111,6 +111,27 @@ def portfolio_exposure(
     )
 
 
+@server.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+def normalize_company_facts(companyfacts: dict, research_cutoff: str, accessed_at: str, expected_cik: str) -> dict[str, object]:
+    """Normalize supplied SEC data at a fixed cutoff; no network or portfolio writes."""
+    module = import_module(import_root + "scripts.fundamentals")
+    return module.normalize_company_facts(companyfacts, research_cutoff, accessed_at, expected_cik)
+
+
+@server.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+def screen_opportunities(universe: list[dict], dossiers: list[dict], criteria: list[dict], research_cutoff: str) -> dict[str, object]:
+    """Check explicit comparable fundamental/product criteria and report exact coverage."""
+    module = import_module(import_root + "scripts.opportunity_screen")
+    return module.screen_opportunities(universe, dossiers, criteria, research_cutoff)
+
+
+@server.tool(annotations=ToolAnnotations(readOnlyHint=True, openWorldHint=False))
+def evaluate_portfolio_proposal(portfolio: dict, plan_version: int, proposal: dict, rules: dict | None = None, dossiers: dict | None = None) -> dict[str, object]:
+    """Compute financing, weights and exposures for a dated proposal; never executes trades."""
+    module = import_module(import_root + "scripts.portfolio_proposals")
+    return module.evaluate_portfolio_proposal(portfolio, plan_version, proposal, rules, dossiers)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(

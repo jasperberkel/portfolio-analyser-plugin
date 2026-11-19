@@ -73,3 +73,7 @@ At round 0 only, you may instead return:
 ```
 
 Group all questions by task_id in one request per task. Ask only relevant registered researchers whose reports are included, not excluded evidence. Use holdings/candidates for instrument facts, valuation for thesis checks and risk for portfolio structure. Never send strategy requests to market. Do not include holdings, portfolio weights, proposed trades or the full strategy in those requests. At round 1 finalize with remaining gaps and qualified conclusions; no further research round. An unresolvable factual question is not an instruction to manufacture an answer or trade.
+
+## Investment contract 1
+
+Prepared contexts advertise `investment_contract_version: 1`. Complete strategies additionally require `proposal`, null for no concrete allocation change or the object in [structured tools](research/structured-tools.md). Plan updates optionally include `allocation_rules`. Proposal and rules are revalidated locally and by the service; the stored strategy contains the service-derived `proposal_check`. The workflow graph remains V2 with methodology revision 2; old native workflows must update together with the service.

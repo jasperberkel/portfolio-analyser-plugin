@@ -1,0 +1,23 @@
+# Structured investment tools
+
+These pure tools operate on supplied evidence and never open a network connection, fetch personal context, place orders or publish. Native MCP clients can call them; isolated research workers with Bash can import the identically named function from the plugin's `scripts` module after adding that directory to `sys.path`. Save inputs and results in the assigned private task directory. The host's isolated web access remains responsible for fetching public evidence.
+
+## Fundamentals
+
+`normalize_company_facts(companyfacts, research_cutoff, accessed_at, expected_cik)` reads an already fetched SEC companyfacts response. Verify the issuer CIK first. Use documented `https://data.sec.gov/api/xbrl/companyfacts/CIK##########.json`; SEC access requires the operator's declared User-Agent. If the host cannot fetch it, report the gap and use permitted issuer filings. Never install a proxy or silently substitute unofficial endpoints.
+
+The result contains contract-compatible `facts`, `sources`, gaps and `available_by` source bounds. Filing dates have day precision, so the parser conservatively excludes the current filing day until it ends in New York. These bounds are not fabricated publication timestamps. Preserve the source's null `published_at` and original locator. It selects restatements only if available by cutoff. It retains exact period dates and currencies; differences of compatible cumulative flows are marked derived. It does not derive EPS, force quarterly reporting, fill missing values with zero or create analyst consensus. Reuse `research_checks.py` for comparable arithmetic. Inspect original filings for segments, custom taxonomy and non-GAAP figures.
+
+## Opportunity screening
+
+`screen_opportunities(universe, dossiers, criteria, research_cutoff)` checks explicit supplied criteria. Each universe item is a contract instrument; each dossier has `instrument_id`, facts and sources, optionally the parser's `available_by` map. Each criterion has metric, operator (`gt`, `gte`, `lt`, `lte`), threshold, unit, currency, period and basis. All criteria must match comparable actual facts. Unknown or ambiguous data gives `unassessed`, never a failed investment thesis. The result names the exact universe, supplied and assessed counts and evidence for each match.
+
+Choose criteria for the asset and question: cash generation, debt reduction, valuation relative to comparable economics, or fund cost/product structure. A qualitative macro/sector search remains useful independently. Do not substitute short-term chart signals for long-term evidence. There is no configured global data feed: obtain a supported, permitted dataset before claiming broad systematic coverage. A matched rule is a research lead, not a recommendation. At most eight resolved candidates enter a full analysis run; zero is valid.
+
+## Allocation proposals
+
+`evaluate_portfolio_proposal(portfolio, plan_version, proposal, rules, dossiers)` uses snapshot-currency values and Decimal arithmetic. Supply the full unchanged snapshot/positions and the current version. The proposal is `{snapshot_id, plan_version, changes: [{instrument, value_change}], cost_reserve, conditional_sales}`. A positive change is a proposed purchase; a negative change is a proposed sale, not a recorded execution. No external capital or leverage. If purchases require sale proceeds, `conditional_sales` must be true. Cost reserves and cash buffers are in base currency.
+
+Structured `allocation_rules` are `{currency, targets, max_exposure, cash_buffer, rationale}`. Targets map stable instrument IDs plus `CASH` to fractional weights totaling 1, or are empty when not explicitly defined. Maximum exposures are fractional limits on combined direct and evidenced indirect company exposure. Preserve existing rules; a change requires a justified plan revision. Never extract ambiguous numerical limits from prose or treat the tool's `pass` as investment merit. Missing fund coverage or cost assumptions remain visible even when known arithmetic passes.
+
+Investment contract 1 adds required `proposal` to complete strategy results: null for no concrete allocation change, otherwise the exact object checked above. A `plan_update` may include `allocation_rules`. Both local workflow and service recompute the proposal from the prepared evidence. The service stores the derived check with the strategy; stale snapshot/plan references and violations reject publication. Include substantive gaps in the report. Standalone calls remain drafts.

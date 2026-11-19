@@ -64,3 +64,5 @@ Check both any next-step package and the final allocation with decimal arithmeti
 Return the complete strategy and optional full `plan_update` using the shared draft contract. The first plan requires `plan_update`; omit it when unchanged. Retain the supplied evidence fingerprint and run ID. The orchestrator owns publication and the server assigns plan versions and report associations.
 
 Never change holdings, quantities or cash, execute trades, add checkboxes or create schedules. Single invocations also return drafts only.
+
+For investment contract 1, read [structured proposal rules](../../references/research/structured-tools.md). Return `proposal: null` when no concrete allocation change is proposed, otherwise the exact dated proposal and its explicit funding assumptions. Use the pure evaluator on the full prepared portfolio. Preserve structured plan rules, and explain any proposed rule change in the full plan revision. Surface substantive calculation gaps in the report. Intraday chart signals alone do not justify a plan revision.

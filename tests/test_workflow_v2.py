@@ -107,6 +107,56 @@ class V2Tests(unittest.TestCase):
         for text in ("PRIVATE", "market_value", "cash_value", "quantity"):
             self.assertNotIn(text, json.dumps(held))
 
+    def test_market_context_survives_successive_runs_without_candidates(self):
+        flow = w.discover(ROOT)
+        heading = "## Marktrelevante Änderungen seit dem letzten Radar"
+        source = "[Hafenmeldung](https://example.com/fake-report)"
+        initial = f"Am 1. Mai meldet der Hafen eine Sperrung bis 5. Mai. {source}"
+        latest = f"Am 4. Mai verlängert der Hafen die Sperrung bis 8. Mai. {source}"
+        updates = [
+            ("2026-05-01", initial, "Erster Radar ohne Vergleichsbasis. " + initial),
+            ("2026-05-04", latest, latest + " Die längere Sperrung könnte Frachtraten erhöhen."),
+            ("2026-05-05", latest, "Keine wesentlichen Änderungen festgestellt."),
+        ]
+        prior = None
+        for day, baseline, change in updates:
+            self.ctx["research_cutoff"] = day + "T12:00:00+00:00"
+            folder = self.path / day
+            w.initialize(folder, self.ctx, flow)
+            market = w.start(folder, "market")
+            self.assertEqual(market["previous_state"], prior)
+            row = result(market, candidates=[])
+            section = heading + "\n\n" + change
+            row["content_markdown"] = "# Marktbericht\n\n" + section
+            row["research_data"]["context_markdown"] = baseline + "\n\n" + section
+            w.write(folder / "market/result.json", row)
+            state = w.collect(folder, "market")
+            self.assertEqual(state["tasks"]["candidates"]["status"], "complete")
+            for name in ("holdings", "valuation", "risk"):
+                task = w.start(folder, name)
+                w.write(folder / name / "result.json", result(task))
+                w.collect(folder, name)
+            draft = w.draft(folder)
+            reports = c.aggregate({r["task_id"]: r for r in draft["research"]}, draft["run_id"])
+            self.ctx["previous_reports"] = {r["analysis_type"]: r for r in reports}
+            report = self.ctx["previous_reports"]["market.discovery"]
+            self.assertEqual(report["content_markdown"], row["content_markdown"])
+            prior = row["research_data"]
+            self.assertEqual(report["research_data"], prior)
+
+    def test_market_collect_rejects_missing_or_different_changes(self):
+        for issue in ("missing", "different"):
+            task = w.start(self.path, "market")
+            row = result(task, candidates=[])
+            if issue == "missing":
+                row["content_markdown"] = "# Marktbericht"
+            else:
+                row["research_data"]["context_markdown"] += " Abweichender Befund."
+            w.write(self.path / "market/result.json", row)
+            state = w.collect(self.path, "market")
+            self.assertEqual(state["tasks"]["market"]["status"], "failed")
+            self.assertIn("Radar", state["tasks"]["market"]["error"])
+
     def test_retry_limit_and_invalidation(self):
         self.finish("market")
         self.finish("holdings")

@@ -89,7 +89,7 @@ def default_workflow():
                 "depends_on": deps,
                 "produces": output,
                 "payload_type": kind,
-                "methodology_revision": "1",
+                "methodology_revision": "2",
             }
             for task, (skill, deps, output, kind) in TASKS.items()
         ],
@@ -162,6 +162,12 @@ def validate_instrument(item):
 def scoped_history(context, report_type, selected=None):
     previous = context.get("previous_reports", {}).get(report_type)
     data = copy.deepcopy(previous.get("research_data")) if previous else None
+    if selected is not None and report_type in ("instrument.research", "valuation.thesis"):
+        try:
+            from .candidate_memory import restore_dossiers
+        except ImportError:
+            from candidate_memory import restore_dossiers
+        data = restore_dossiers(data, context.get("candidate_memory", []), report_type, selected)
     if not data:
         return None
     if selected is not None:
@@ -243,6 +249,12 @@ def build_input(context, flow, run_id, task_id, accepted, *, followup_round=0, q
         "followup_round": followup_round,
         "questions": questions,
     }
+    if task_id == "market" and context.get("candidate_memory"):
+        try:
+            from .candidate_memory import radar_history
+        except ImportError:
+            from candidate_memory import radar_history
+        data["candidate_history"] = radar_history(context["candidate_memory"])
     if task_id == "risk":
         data["current_portfolio"] = {k: dashboard[k] for k in ("snapshot", "positions")}
         data["plan"] = dashboard.get("plan")
@@ -313,7 +325,11 @@ def validate_payload(data, kind, selected, cutoff):
         )
         ids = []
         for candidate in data["candidates"]:
-            fields(candidate, ("instrument", "hypothesis", "risks", "questions", "source_ids"))
+            fields(candidate, ("instrument", "hypothesis", "risks", "questions", "source_ids"), ("review_trigger", "review_after"))
+            if "review_trigger" in candidate:
+                string(candidate["review_trigger"])
+            if candidate.get("review_after") is not None:
+                require(stamp(candidate["review_after"]) >= stamp(cutoff), "Candidate review date precedes research cutoff")
             validate_instrument(candidate["instrument"])
             ids.append(candidate["instrument"]["instrument_id"])
             string(candidate["hypothesis"])
@@ -753,3 +769,38 @@ def aggregate(results, run_id):
             }
         )
     return reports
+
+
+def validate_investment_strategy(value, prepared):
+    """Shared proposal gate; service recomputes independently before atomic publication."""
+    try:
+        from .portfolio_proposals import evaluate_portfolio_proposal, evaluate_plan_targets, allocation_rules
+    except ImportError:
+        from portfolio_proposals import evaluate_portfolio_proposal, evaluate_plan_targets, allocation_rules
+    dashboard = prepared["dashboard"]
+    plan = dashboard.get("plan")
+    if prepared.get("investment_contract_version") == 1:
+        require("proposal" in value, "Investment contract requires proposal (null for no allocation change)")
+    update = value.get("plan_update") or {}
+    rules = update.get("allocation_rules", (plan or {}).get("allocation_rules"))
+    if "allocation_rules" in update or rules is not None:
+        allocation_rules(rules)
+    proposal = value.get("proposal")
+    if proposal is None and not (update and rules):
+        return None
+    evidence = {"items": []}
+    for report in dashboard.get("reports", []):
+        if report["analysis_type"] == "instrument.research":
+            evidence["items"].extend(report["research_data"]["items"])
+    target_check = None
+    if update and rules:
+        target_check = evaluate_plan_targets({k: dashboard[k] for k in ("snapshot", "positions")}, plan["version"] if plan else 0, rules, evidence)
+        require(not target_check or not target_check["violations"], "Invalid plan targets: " + "; ".join((target_check or {}).get("violations", [])))
+    if proposal is None:
+        return {"target_check": target_check} if target_check else None
+    evaluation = evaluate_portfolio_proposal(
+        {k: dashboard[k] for k in ("snapshot", "positions")},
+        plan["version"] if plan else 0, proposal, rules, evidence)
+    require(not evaluation["violations"], "Invalid portfolio proposal: " + "; ".join(evaluation["violations"]))
+    evaluation["target_check"] = target_check
+    return evaluation

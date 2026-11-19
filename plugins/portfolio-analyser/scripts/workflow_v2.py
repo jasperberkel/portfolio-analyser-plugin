@@ -1,6 +1,7 @@
 """Dependency-aware V2 scheduler. Agent execution belongs to the host orchestrator."""
 
 import copy
+import re
 import uuid
 from pathlib import Path
 
@@ -107,6 +108,18 @@ def start(folder, task_id):
     return api().read(Path(folder) / task_id / "input.json")
 
 
+def radar_changes(markdown):
+    heading = "## Marktrelevante Änderungen seit dem letzten Radar"
+    sections = re.split(r"(?m)^(#{1,2} [^\n]*)$", markdown)
+    matches = [
+        body.strip()
+        for title, body in zip(sections[1::2], sections[2::2])
+        if title.strip() == heading
+    ]
+    c.require(len(matches) == 1 and matches[0], f"Expected one nonempty section: {heading}")
+    return matches[0]
+
+
 def collect(folder, task_id, failed=False):
     state = api().read_state(folder)
     task = state["tasks"][task_id]
@@ -115,6 +128,10 @@ def collect(folder, task_id, failed=False):
         c.require(not failed, "Agent failed")
         result = api().read(Path(folder) / task_id / "result.json")
         c.validate_result(result, api().read(Path(folder) / task_id / "input.json"))
+        if task_id == "market":
+            visible = radar_changes(result["content_markdown"])
+            saved = radar_changes(result["research_data"]["context_markdown"])
+            c.require(visible == saved, "Radar changes differ between report and saved market context")
         api().packet(result)
         api().write(Path(folder) / task_id / "accepted.json", result)
         task.update(status="complete", error=None)
@@ -231,6 +248,7 @@ def accept_strategy(folder, value, legacy_accept):
             c.require(request["questions"], "Empty follow-up questions")
             questions[target] = request["questions"]
         return invalidate(folder, questions, questions)
+    c.validate_investment_strategy(value, task["strategy_context"])
     # Reuse existing complete strategy/plan validation, preserving V4 behavior.
     legacy_value = copy.deepcopy(value)
     legacy_value["contract_version"] = 1

@@ -6,6 +6,8 @@
 
 import asyncio
 import shutil
+import os
+import sys
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -13,7 +15,7 @@ from mcp.client.stdio import stdio_client
 async def check():
     async with (
         stdio_client(
-            StdioServerParameters(command=shutil.which("portfolio-advisory") or "portfolio-advisory")
+            StdioServerParameters(command=sys.executable, args=[os.environ["ADVISORY_SCRIPT"]]) if os.environ.get("ADVISORY_SCRIPT") else StdioServerParameters(command=shutil.which("portfolio-advisory") or "portfolio-advisory")
         ) as streams,
         ClientSession(*streams) as client,
     ):
@@ -21,7 +23,7 @@ async def check():
         assert capabilities.tools and capabilities.resources is None and capabilities.prompts is None
         tools = await client.list_tools()
         assert {tool.name for tool in tools.tools} == {
-            "build_portfolio_snapshot", "portfolio_exposure",
+            "build_portfolio_snapshot", "portfolio_exposure", "normalize_company_facts", "screen_opportunities", "evaluate_portfolio_proposal",
         }
         manifest = {
             "as_of": "2026-10-01", "base_currency": "EUR", "cash_value": "200",
@@ -71,10 +73,25 @@ async def check():
         assert result.structuredContent["unknown"]
         data["fund_compositions"][0]["exposures"][0]["weight"] = "1.5"
         assert (await client.call_tool("portfolio_exposure", data)).isError
+        normalized = await client.call_tool("normalize_company_facts", {
+            "companyfacts": {"cik": 1, "facts": {}}, "expected_cik": "1",
+            "research_cutoff": "2026-11-01T12:00:00Z", "accessed_at": "2026-11-01T12:00:00Z",
+        })
+        assert not normalized.isError and normalized.structuredContent["gaps"]
+        screened = await client.call_tool("screen_opportunities", {
+            "universe": [], "dossiers": [], "research_cutoff": "2026-11-01T12:00:00Z",
+            "criteria": [{"metric": "revenue", "operator": "gt", "threshold": "0", "unit": "currency", "currency": "EUR", "period": "2026", "basis": "IFRS"}],
+        })
+        assert not screened.isError and screened.structuredContent["universe_count"] == 0
+        checked = await client.call_tool("evaluate_portfolio_proposal", {
+            "portfolio": {"snapshot": {"id": "synthetic", "base_currency": "EUR", "total_value": "100", "cash_value": "100"}, "positions": []},
+            "plan_version": 1, "proposal": {"snapshot_id": "synthetic", "plan_version": 1, "changes": [], "cost_reserve": "1", "conditional_sales": False},
+        })
+        assert not checked.isError and checked.structuredContent["cash_after"] == "99"
 
 
 if __name__ == "__main__":
     asyncio.run(check())
     print(
-        "Independent MCP client: only two tools, valid and invalid snapshots and exposures verified."
+        "Independent MCP client: five pure tools, valid and invalid snapshots and exposures verified."
     )

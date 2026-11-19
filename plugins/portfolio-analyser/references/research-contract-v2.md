@@ -32,3 +32,9 @@ Read previous_state as historical evidence, never as fresh data. Only the assign
 ## Strategy V2
 
 The document payload stays Markdown V4. Use the strategy result in draft-contract.md with contract_version: 2. Follow-up requests use {task_id, questions}, not skill names. Allowed targets are holdings, candidates, valuation, risk and only when the core package is included. Copy the prepared evidence token; read all included Markdown and research_data. Existing plans/strategies are historical reasoning, not a way to reintroduce excluded research as current evidence.
+
+## Durable candidate history
+
+The service supplies `candidate_memory` at context level, isolated from allocations. Market inputs receive only the discovery projection as `candidate_history`. Instrument and valuation `previous_state` restore a previously researched candidate even after intervening runs omitted it. Source IDs are namespaced during restoration; thesis/event IDs and original timestamps remain unchanged. These historical records never become fresh evidence. Publication appends candidate observations in the same transaction as all reports. Candidate history does not authorize monitoring.
+
+Market candidates optionally carry `review_trigger` (specific research condition) and `review_after` (timezone-aware future date or null). Methodology revision 2 asks for a concrete trigger. These fields are preserved in the journal without creating a schedule.

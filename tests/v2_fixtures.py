@@ -99,8 +99,15 @@ def result(task, *, candidates=None):
     kind = task["payload_type"]
     data = {"schema_version": 1, "kind": kind, "sources": [source]}
     if kind == "market":
+        changes = (
+            "Keine wesentlichen Änderungen festgestellt."
+            if task["previous_state"]
+            else "Erster Radar ohne Vergleichsbasis."
+        )
+        section = "## Marktrelevante Änderungen seit dem letzten Radar\n\n" + changes
+        value["content_markdown"] += "\n\n" + section
         data.update(
-            context_markdown="Speichertechnik prüfen.",
+            context_markdown="Speichertechnik prüfen.\n\n" + section,
             deferred=[],
             candidates=[
                 {
@@ -182,6 +189,9 @@ def result(task, *, candidates=None):
                 )
                 if previous:
                     item["theses"] = copy.deepcopy(previous["theses"])
+                    for inherited in task["previous_state"].get("sources", []):
+                        if inherited["source_id"] not in {s["source_id"] for s in data["sources"]}:
+                            data["sources"].append(copy.deepcopy(inherited))
             data["items"].append(item)
         if kind == "instruments":
             data["hypotheses"] = task.get("candidate_hypotheses", [])

@@ -3,13 +3,19 @@ import { researchInstructions, researchTask } from "./earnings_research.mjs";
 const root = fileURLToPath(new URL("../", import.meta.url));
 
 export async function wake({ call, deliver, destination, web, complete, validate, firstWake }) {
-  if (firstWake) await call("sync_earnings_tracking", { destination });
+  if (firstWake) {
+    const investments = await call("get_investment_monitoring", {});
+    if (!investments.enabled) await call("sync_earnings_tracking", { destination });
+  }
   const research = async (task) => researchTask({
     task, instructions: await researchInstructions(root, task.phase),
     ...web, validate,
     decide: async (prompt, input) => JSON.parse((await complete(prompt, JSON.stringify(input))).trim().replace(/^```(?:json)?\s*|\s*```$/g, "")),
   });
-  return (await dispatch({ call, deliver, destination, research, render: renderDelivery })) !== "idle";
+  const earnings = await dispatch({ call, deliver, destination, research, render: renderDelivery });
+  // Check both independent queues; one busy earnings issuer must not starve material events.
+  const investments = await dispatchInvestment({ call, deliver, destination, research });
+  return earnings !== "idle" || investments !== "idle";
 }
 
 /** One replay-safe work batch in a single authenticated account. */
@@ -119,4 +125,30 @@ export function renderDelivery(item) {
         doc.reaction_source.url,
     );
   return lines.join("\n");
+}
+
+
+export async function dispatchInvestment({ call, research, deliver, destination }) {
+  const due = await call("check_due_investment_events", { destination });
+  if (!due.ready) return "idle";
+  const task = await call("claim_due_investment_events", { destination });
+  if (task.phase === "idle") return "idle";
+  if (task.phase === "delivery") {
+    const { id, body } = task.delivery;
+    const receipt = await deliver(id, renderInvestment(body), {
+      name: "prepare_investment_delivery", args: { delivery_id: id, destination },
+    });
+    await call("ack_investment_delivery", { delivery_id: id, receipt, destination });
+    return "delivery";
+  }
+  const { result, web_trace } = await research(task);
+  await call("complete_investment_check", { claim: task.claim, result, web_trace });
+  return task.phase;
+}
+
+export function renderInvestment(body) {
+  return [body.instrument.name + " · " + body.title, "", body.observation,
+    "Bedeutung für die Anlagethese: " + body.thesis_effect,
+    "Anlass zur Prüfung: " + body.review_reason,
+    "Quelle: [" + body.source.title + "](" + body.source.url + ")"].join("\n");
 }

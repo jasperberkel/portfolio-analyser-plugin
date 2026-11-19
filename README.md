@@ -1,6 +1,6 @@
 # Portfolio Analyser Plugin
 
-The package supplies ten native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs two calculations: `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. Neither starts a model.
+The package supplies eleven native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs five pure tools. `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. The additional tools normalize supplied SEC companyfacts, screen explicit evidence and evaluate dated allocation proposals. None starts a model or executes trades.
 
 ## Local host installation
 
@@ -32,7 +32,7 @@ portfolio-advisory --help
 python tests/smoke_advisory_mcp.py
 ```
 
-Register the installed `portfolio-advisory` executable as the client's stdio command. Such clients receive the two tools. A host must also support native Agent Skills to use the research instructions. App publication requires an authorized app connection. Research requires the host's evidence sources, import requires attachment access, and full runs also need writable task storage and workers. A remote client requires an authenticated reachable connection supplied by its operator.
+Register the installed `portfolio-advisory` executable as the client's stdio command. Such clients receive the five tools. A host must also support native Agent Skills to use the research instructions. App publication requires an authorized app connection. Research requires the host's evidence sources, import requires attachment access, and full runs also need writable task storage and workers. A remote client requires an authenticated reachable connection supplied by its operator.
 
 ## Included skills
 
@@ -73,7 +73,7 @@ After installation, ask Codex or Claude Code:
 Richte das Trading-Paket ein.
 ```
 
-The optional private service uses native authenticated HTTP MCP. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. The two calculation tools run independently of this setup.
+The optional private service uses native authenticated HTTP MCP. The host manages credentials and schedules. After a successful manual run, setup can configure one daily job at the requested time and reconcile existing jobs. The pure calculation tools run independently of this setup.
 
 ## Ask an agent to install it
 
@@ -145,3 +145,11 @@ Build the wheel with `python3 -m pip wheel --no-deps . -w /tmp/trading-wheels`. 
 The wheel owns the monitoring workflow in `scripts/earnings_wake.mjs`, including due checks, research, formatting, delivery preparation and acknowledgement. The personal service checks authority and stores the result. Migration preserves existing private chat IDs and the transcript idempotency keys used before 0.12.1.
 
 Portable host tests and model-routing evals live in `tests/thomas/`. Set `THOMAS_RUNTIME` to the host's `infrastructure/always-on` directory. Run `tests/thomas/tests/test-bundle.sh WHEEL` for the offline gateway and Codex integration. Run `python3 tests/thomas/evals/live.py --help` for the optional real-model runs and their separate transport-only controls. Financial test criteria belong here.
+
+## Long-term investment research (0.13.0)
+
+Update the private service and plugin together: V2 workflow methodology revision 2 adds investment contract 1. Existing reports and plans remain readable; no monitoring is enabled by migration. Structured plan rules and proposals are optional historical data, but new complete strategy responses explicitly return a proposal or null. The service independently checks funding and combined exposures before publication.
+
+Candidate history persists across quiet or skipped runs, with original hypotheses, source dates and thesis IDs. The independent radar receives only discovery history. Candidates are not watches. `investment-monitor` enables material thesis-event monitoring only on an explicit request, using the existing private host wake and receipt-backed delivery. Its default cadence is daily and its leased batches are bounded. Price signals do not create orders or allocation revisions.
+
+The new pure tools require supplied source data; no global feed is installed. See [structured tools](plugins/portfolio-analyser/references/research/structured-tools.md). No third-party day-trading code is vendored; the implementation uses the documented SEC format and our existing contracts. Networkless tests cover cutoff-safe normalization, coverage, candidate continuity and portfolio proposals. Real-model eval runs remain a separate request.
