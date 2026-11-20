@@ -46,7 +46,7 @@ Use the host-specific explicit invocation with this prompt:
 
 ```text
 [portfolio-analyser:run-analysis]
-Run the installed run-analysis skill exactly as defined: load app context, execute ready research tasks in dependency order, parallelizing independent tasks, create portfolio strategy, and publish the complete package atomically. If a required dependency, researcher or publication step fails, preserve drafts and report the failure without publishing a partial package. If the identical daily context already has a successful run, stay quiet. Notify only on a newly completed analysis, a failure, or required user action.
+Run the installed run-analysis skill and publish the complete package atomically. Use its recommendation format for the private chat after verified publication. If a required stage fails, preserve drafts and report that stage. If the identical daily context already has a successful run, stay quiet.
 ```
 
 Save the confirmed recurrence and timezone. Report the effective single schedule, paused legacy jobs, scheduler type and any host limitation. Do not claim profile isolation on a host that only uses role instructions.

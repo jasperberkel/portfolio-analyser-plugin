@@ -63,7 +63,8 @@ def screen_opportunities(universe, dossiers, criteria, research_cutoff):
                 source = sources.get(sid)
                 if not source:
                     return False
-                when = source.get("published_at") or d.get("available_by", {}).get(sid)
+                when = (source.get("published_at") or d.get("available_by", {}).get(sid)
+                        or source.get("accessed_at"))
                 return bool(when and stamp(when) <= cutoff)
 
             if not references or not all(available(sid) for sid in references):

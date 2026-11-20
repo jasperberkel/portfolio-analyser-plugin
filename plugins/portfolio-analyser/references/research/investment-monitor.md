@@ -11,3 +11,5 @@ Each event uses the supplied JSON schema: instrument ID, event key, allowed kind
 The model produces evidence and a reason to review. It never submits an order, changes an allocation plan or treats the review date as an execution deadline. An event report is separate from a completed portfolio analysis. Existing atomically published analysis runs and their required research coverage remain unchanged.
 
 Use supplied `theses` as the dated research baseline and identify which supported assumption changed. They are historical, not new evidence. Without a prior thesis, explain the supported business/product implication and state that no prior investment assumption was supplied. Do not invent a purchase motive.
+
+The private chat opens with `review_reason`. Write one short German sentence naming what is worth reconsidering or watching. In `observation` give the decisive new fact, and in `thesis_effect` explain its consequence. Keep any condition in the same sentence as the suggestion.

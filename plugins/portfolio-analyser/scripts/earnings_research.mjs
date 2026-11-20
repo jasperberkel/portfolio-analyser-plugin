@@ -134,6 +134,15 @@ export async function researchTask({
     };
   if (["calendar", "probe", "review", "preview", "investment"].includes(phase) && !queries.length)
     throw Error("Model did not attempt required source discovery");
+  if (phase === "investment" && !evidence.length) {
+    const reason = gaps.length
+      ? "Die Quellenprüfung war unvollständig. Eine Änderung der Anlagethese bleibt offen."
+      : "Die Suche lieferte keinen überprüften Beleg für den Zeitraum.";
+    return {
+      result: { events: [], researched: identity.instruments.map(i => i.instrument_id), gaps: [reason] },
+      web_trace: { queries, gaps, opened: [] },
+    };
+  }
   const finalRequest = {
     instruction: policy,
     task: { ...task, claim: undefined },

@@ -78,6 +78,34 @@ class FundamentalTests(unittest.TestCase):
                 {"cik": 2}, "2026-11-01T12:00:00Z", "2026-11-01T12:00:00Z", "1"
             )
 
+    def test_balance_uses_only_dated_instant_and_known_filing(self):
+        cash = self.row(val=70)
+        del cash["start"]
+        later = {**cash, "val": 12, "filed": "2026-11-02", "accn": "0001-26-2"}
+        for tag in ("CashAndCashEquivalentsAtCarryingValue", "LiabilitiesCurrent"):
+            for cutoff, value in (("2026-11-02T18:00:00Z", "70"), ("2026-11-03T05:00:00Z", "12")):
+                facts = self.normalize([cash, later, self.row(val=500)], cutoff, metric=tag)["facts"]
+                self.assertEqual([(f["period"], f["value"]) for f in facts], [("2026-06-30", value)])
+
+    def test_free_cash_flow_requires_comparable_payments(self):
+        cutoff = "2026-11-01T12:00:00Z"
+        def free_cash_flow(capex, unit="USD"):
+            inputs = {"cik": 1, "facts": {"us-gaap": {
+                "NetCashProvidedByUsedInOperatingActivities": {"units": {"USD": [self.row()]}},
+                "PaymentsToAcquirePropertyPlantAndEquipment": {"units": {unit: [capex]}},
+            }}}
+            output = normalize_company_facts(inputs, cutoff, cutoff, "1")
+            return [f for f in output["facts"] if f["metric"] == "free_cash_flow"]
+
+        facts = free_cash_flow(self.row(val=140))
+        self.assertEqual(len(facts), 1)
+        self.assertEqual(facts[0]["value"], "-40")
+        self.assertTrue(facts[0]["source_ids"])
+        self.assertEqual(free_cash_flow(self.row(val=-20)), [])
+        self.assertEqual(free_cash_flow(self.row(val=20), "EUR"), [])
+        self.assertEqual(free_cash_flow(self.row(val=20, start="2026-04-01")), [])
+        self.assertEqual(free_cash_flow(self.row(val=20, accn="0001-26-2")), [])
+
     def test_units_and_missing_data_not_zero(self):
         result = self.normalize([self.row()], unit="EUR")
         self.assertEqual(result["facts"][0]["currency"], "EUR")
@@ -121,6 +149,11 @@ class FundamentalTests(unittest.TestCase):
         self.assertEqual(
             [r["status"] for r in data["results"]], ["matched", "unassessed"]
         )
+        dossier = {"instrument_id": SOLAR["instrument_id"], **result, "available_by": {}}
+        def assessed(cutoff):
+            return screen_opportunities([SOLAR], [dossier], [rule], cutoff)["assessed_count"]
+        self.assertEqual(assessed("2026-10-31T12:00:00Z"), 0)
+        self.assertEqual(assessed("2026-11-01T12:00:00Z"), 1)
         rule["currency"] = "EUR"
         self.assertEqual(
             screen_opportunities(

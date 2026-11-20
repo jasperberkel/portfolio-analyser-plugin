@@ -6,4 +6,6 @@ Cite every material current claim with a direct source and locator. Source IDs a
 
 Separate observed fact, management guidance, timestamped pre-event analyst consensus and your own assumption. Unavailable consensus is a gap; year-over-year growth is not an earnings surprise. Complete the investigation for each assigned instrument even when facts remain unknown. Do not use a missing metric as adverse evidence.
 
+For a day-only publication retain the source-local date and zone in the locator. Admit it as dated evidence after that local day has ended unless an earlier verified observation establishes availability. Record whether access failed, the source lacks coverage, or a successfully examined release contained no change. Only the last finding supports a claim about what the release said.
+
 All outputs follow ../research-contract-v2.md. Preserve identity, provenance and full coverage. Use scripts/research_checks.py for numerical comparisons; units and periods must be compatible. It calculates consistency, not truth. Keep Markdown concise but preserve decisive counterevidence in structured results and prose.

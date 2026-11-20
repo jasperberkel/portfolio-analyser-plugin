@@ -1,6 +1,6 @@
 # Portfolio Analyser Plugin
 
-The package supplies eleven native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs five pure tools. `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. The additional tools normalize supplied SEC companyfacts, screen explicit evidence and evaluate dated allocation proposals. None starts a model or executes trades.
+The package supplies twelve native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs five pure tools. `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. The additional tools normalize supplied SEC companyfacts, screen explicit evidence and evaluate dated allocation proposals. None starts a model or executes trades.
 
 ## Local host installation
 
@@ -36,6 +36,7 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 
 ## Included skills
 
+- `portfolio-advice` shows published suggestions and explains an earlier recommendation or alert using its original evidence
 - `earnings-analysis`: one-off and scheduled earnings previews, comparable actuals, revisions and dated scenarios
 - `earnings-monitor`: authenticated stock tracking, delivery modes and the persistent event workflow
 - `portfolio-import`: import portfolio documents with their report and continue to analysis with the analysis permission

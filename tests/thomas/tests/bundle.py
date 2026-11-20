@@ -18,7 +18,7 @@ from install_package import stage
 TOOL = "portfolio__portfolio_exposure"
 NATIVE_SKILLS = {
     "earnings-analysis", "earnings-monitor", "investment-monitor", "instrument-research", "market-discovery-research", "portfolio-analyser-setup", "portfolio-import",
-    "portfolio-risk-research", "portfolio-strategy", "run-analysis", "valuation-thesis-research",
+    "portfolio-advice", "portfolio-risk-research", "portfolio-strategy", "run-analysis", "valuation-thesis-research",
 }
 POSITIONS = {
     "base_currency": "EUR", "total_value": 1000, "cash_value": 200,

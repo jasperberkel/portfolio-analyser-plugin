@@ -43,90 +43,53 @@ export async function dispatch({ call, research, deliver, render, destination })
   return task.phase;
 }
 
-export function renderDelivery(item) {
-  const doc = item.body;
-  const facts = item.actual?.facts || doc.facts || [];
-  const source = item.actual?.source;
-  const basis = doc.portfolio_basis;
-  const current = item.current_portfolio_basis;
-  const basisMatches =
-    !basis ||
-    !current ||
-    (basis.snapshot_id === current.snapshot_id &&
-      basis.plan_version === current.plan_version &&
-      basis.held === current.held);
-  const personal = basisMatches
-    ? doc.portfolio_context
-    : current.held
-      ? "Depot oder Plan wurden seit diesem Bericht aktualisiert. Die Einordnung der Position ist erneut zu prüfen."
-      : "Aktuell nur beobachtet. Die Emittentenszenarien gelten für eine mögliche Erstposition.";
-  const lines = [item.identity.name + " · " + item.fiscal_period, ""];
-  if (item.kind === "preview") lines.push("Vorabbericht", doc.assessment, ...(doc.gaps || []));
-  else
-    lines.push(
-      "Quartalszahlen",
-      doc.outlook,
-      personal,
-      "Positives Szenario: " + doc.scenarios.positive,
-      "Neutrales Szenario: " + doc.scenarios.neutral,
-      "Negatives Szenario: " + doc.scenarios.negative,
-      "Zeithorizont: " + doc.horizon,
-      "Unsicherheit: " + doc.uncertainty,
-    );
-  for (const view of doc.sentiment?.perspectives || []) {
-    lines.push(
-      view.participant +
-        " (" +
-        view.kind +
-        ", " +
-        view.source.published_at +
-        "): " +
-        view.view +
-        " " +
-        view.rationale +
-        " Unsicherheit: " +
-        view.uncertainty +
-        " " +
-        view.source.url,
-    );
-  }
-  for (const gap of doc.sentiment?.limitations || []) lines.push(gap);
-  const labels = {
-    consensus: "Analystenkonsens",
-    guidance: "Unternehmensausblick",
-    assumption: "Annahme",
-    actual: "Ist",
-  };
-  for (const fact of facts) {
-    const basis = [fact.basis, fact.period, fact.currency].filter(Boolean).join(", ");
-    lines.push(
-      `${labels[fact.value_kind]} · ${fact.metric}: ${fact.value} ${fact.unit} (${basis}). ${fact.source.url}`,
-    );
-  }
-  for (const c of doc.comparisons || []) {
-    lines.push(
-      `${c.metric}: ${c.actual} gegenüber ${c.expected} ${c.unit} (${labels[c.comparison_kind]}), Abweichung ${c.difference} ${c.difference_unit}. Stand ${c.source.accessed_at}. ${c.source.url}`,
-    );
-  }
-  if (basis?.as_of) lines.push("Depotstand des Berichts: " + basis.as_of + ".");
-  for (const gap of item.preview?.gaps || []) lines.push(gap);
-  if (doc.baseline_gap) lines.push(doc.baseline_gap);
-  if (source)
-    lines.push(
-      "Veröffentlichung: " + (item.actual.published_at || item.actual.published_on) + " · " + source.url,
-    );
-  if (doc.market_reaction)
-    lines.push(
-      "Beobachtete Marktreaktion (" +
-        doc.reaction_window +
-        "): " +
-        doc.market_reaction +
-        " " +
-        doc.reaction_source.url,
-    );
-  return lines.join("\n");
+// Older stored reviews can contain whole reports in a single field. Keep a
+// qualified conclusion intact or defer it in full to the saved explanation.
+function shortField(value, fallback) {
+  const line = value?.trim().replace(/\s+/g, " ");
+  return line && line.length <= 280 ? line : fallback;
 }
 
+function reportedFact(facts) {
+  const labels = {actual: "Gemeldet", guidance: "Unternehmensausblick", consensus: "Analystenkonsens"};
+  const fact = facts?.find(f => labels[f.value_kind] && f.source?.url && f.value != null);
+  if (!fact) return null;
+  const measure = [...new Set([fact.unit, fact.currency].filter(Boolean))].join(" ");
+  const text = shortField(`${fact.metric} (${fact.period}, ${fact.basis}) · ${labels[fact.value_kind]} ${fact.value} ${measure}.`, null);
+  return text ? {text, source: fact.source} : null;
+}
+
+export function renderDelivery(item) {
+  const doc = item.body;
+  const preview = item.kind === "preview";
+  const lines = [item.identity.name + " · " + item.fiscal_period, "",
+    preview ? "Vorabbericht" : "Quartalszahlen"];
+  let source;
+  if (preview) {
+    const fact = reportedFact(doc.facts);
+    lines.push(shortField(doc.assessment, fact?.text || "Die Einschätzung vor den Zahlen liegt vor."));
+    if (doc.gaps?.length) lines.push(shortField(doc.gaps[0], "Die Erwartungen sind nur teilweise belegt."));
+    source = fact?.source;
+  } else {
+    const basis = doc.portfolio_basis;
+    const current = item.current_portfolio_basis;
+    if (current && basis?.snapshot_id !== undefined && current.snapshot_id === basis.snapshot_id &&
+        current.plan_version === basis.plan_version && current.held === basis.held) {
+      const personal = shortField(doc.uncertainty, null) ? shortField(doc.portfolio_context, null) : null;
+      lines.push(personal || "Die Bedingungen für einen konkreten Schritt sind im Bericht erläutert.");
+    } else if (current?.held === false) {
+      lines.push("Aktuell nur beobachtet. Für einen Einstieg zählt, ob sich die Annahmen bestätigen.");
+    } else if (current || basis) {
+      lines.push("Für einen konkreten Schritt muss der aktuelle Depotstand neu bewertet werden.");
+    }
+    lines.push(shortField(doc.outlook, reportedFact(item.actual?.facts)?.text || "Die Einschätzung zu den veröffentlichten Zahlen liegt vor."));
+    if (doc.uncertainty) lines.push(shortField(doc.uncertainty, "Die Einschätzung hängt von mehreren offenen Annahmen ab."));
+    if (doc.baseline_gap) lines.push(shortField(doc.baseline_gap, "Der Vergleich mit den Erwartungen ist eingeschränkt."));
+    source = item.actual?.source;
+  }
+  if (source?.url) lines.push(source.url);
+  return lines.join("\n");
+}
 
 export async function dispatchInvestment({ call, research, deliver, destination }) {
   const due = await call("check_due_investment_events", { destination });
@@ -147,8 +110,9 @@ export async function dispatchInvestment({ call, research, deliver, destination 
 }
 
 export function renderInvestment(body) {
-  return [body.instrument.name + " · " + body.title, "", body.observation,
-    "Bedeutung für die Anlagethese: " + body.thesis_effect,
-    "Anlass zur Prüfung: " + body.review_reason,
-    "Quelle: [" + body.source.title + "](" + body.source.url + ")"].join("\n");
+  return [body.instrument.name + " · " + body.title, "",
+    shortField(body.review_reason, "Prüfe die bisherige Einschätzung zu diesem Titel."),
+    shortField(body.observation, "Eine neue Veröffentlichung liegt vor."),
+    shortField(body.thesis_effect, "Die Bedeutung hängt von den Annahmen im Bericht ab."),
+    body.source.url].join("\n");
 }

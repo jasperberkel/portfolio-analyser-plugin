@@ -33,7 +33,21 @@ METRICS = {
         ("us-gaap", "EarningsPerShareDiluted"),
         ("ifrs-full", "DilutedEarningsLossPerShare"),
     ],
+    "cash_and_equivalents": [
+        ("us-gaap", "CashAndCashEquivalentsAtCarryingValue"),
+        ("ifrs-full", "CashAndCashEquivalents"),
+    ],
+    "current_liabilities": [
+        ("us-gaap", "LiabilitiesCurrent"),
+        ("ifrs-full", "CurrentLiabilities"),
+    ],
+    "capital_expenditure": [
+        ("us-gaap", "PaymentsToAcquirePropertyPlantAndEquipment"),
+        ("ifrs-full", "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities"),
+    ],
 }
+
+BALANCE_METRICS = {"cash_and_equivalents", "current_liabilities"}
 
 
 def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expected_cik):
@@ -48,6 +62,7 @@ def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expecte
     require(cik == str(int(expected_cik)), "Companyfacts issuer mismatch")
     facts, sources, gaps, availability = [], {}, [], {}
     for metric, concepts in METRICS.items():
+        is_balance = metric in BALANCE_METRICS
         selected = {}
         for taxonomy, concept in concepts:
             units = (
@@ -78,10 +93,13 @@ def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expecte
                     }:
                         continue
                     if (
-                        not row.get("start")
+                        not row.get("end")
                         or not row.get("filed")
                         or not row.get("accn")
                     ):
+                        continue
+                    has_duration = bool(row.get("start"))
+                    if (is_balance and has_duration) or (not is_balance and not has_duration):
                         continue
                     filed = date.fromisoformat(row["filed"])
                     available = datetime.combine(
@@ -89,12 +107,10 @@ def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expecte
                     )
                     if available > cutoff:
                         continue
-                    start, end = (
-                        date.fromisoformat(row["start"]),
-                        date.fromisoformat(row["end"]),
-                    )
+                    end = date.fromisoformat(row["end"])
+                    start = end if is_balance else date.fromisoformat(row["start"])
                     require(start <= end <= filed, "Invalid financial reporting period")
-                    key = (row["start"], row["end"], unit)
+                    key = (start.isoformat(), row["end"], unit)
                     rank = (row["filed"], row["accn"])
                     if key in latest and rank == latest[key][0]:
                         require(
@@ -135,7 +151,7 @@ def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expecte
                         if metric == "diluted_eps"
                         else "currency",
                         "currency": currency,
-                        "period": key[0] + "/" + key[1],
+                        "period": key[1] if is_balance else key[0] + "/" + key[1],
                         "basis": taxonomy + ":" + concept,
                         "value_kind": "actual",
                         "source_ids": [sid],
@@ -144,7 +160,7 @@ def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expecte
         values = list(selected.values())
         if not values:
             gaps.append(metric + ": no comparable filed data available by cutoff")
-        if metric != "diluted_eps":
+        if not is_balance and metric != "diluted_eps":
             # Derive a quarter/half-year from compatible cumulative flows only.
             for whole in list(values):
                 start, end = map(date.fromisoformat, whole["period"].split("/"))
@@ -226,16 +242,33 @@ def _normalize_company_facts(companyfacts, research_cutoff, accessed_at, expecte
                             ),
                         }
                     )
-        for value in values:
-            value["fact_id"] = (
-                "fundamental:"
-                + sha256(
-                    repr(
-                        (metric, value["period"], value["currency"], value["basis"])
-                    ).encode()
-                ).hexdigest()[:20]
-            )
-            facts.append(value)
+        facts.extend(values)
+    # Compare directly reported flows from the same statement and filing vintage.
+    # Different filings can contain incompatible restatements for the same period.
+    def statement_key(fact):
+        taxonomy = fact["basis"].partition(":")[0]
+        return fact["period"], fact["currency"], taxonomy, tuple(fact["source_ids"])
+
+    cash_flows = {
+        statement_key(fact): fact
+        for fact in facts
+        if fact["metric"] == "operating_cash_flow" and ";" not in fact["basis"]
+    }
+    for capex in list(facts):
+        if capex["metric"] != "capital_expenditure" or ";" in capex["basis"]:
+            continue
+        flow = cash_flows.get(statement_key(capex))
+        if flow is None or number(capex["value"]) < 0:
+            continue
+        facts.append({
+            **capex,
+            "metric": "free_cash_flow",
+            "value": str(number(flow["value"]) - number(capex["value"])),
+            "basis": flow["basis"] + " minus " + capex["basis"] + "; derived",
+        })
+    for fact in facts:
+        identity = (fact["metric"], fact["period"], fact["currency"], fact["basis"])
+        fact["fact_id"] = "fundamental:" + sha256(repr(identity).encode()).hexdigest()[:20]
     return {
         "facts": facts,
         "sources": list(sources.values()),

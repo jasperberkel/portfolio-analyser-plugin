@@ -17,4 +17,6 @@ For actuals, verify the document identifies this issuer and fiscal period and co
 
 For a leased task return the exact fields in the [monitor contract](../../references/research/earnings-monitor.md). For a one-off, return the German analysis directly with sources and explicit gaps. No account write, notification or order.
 
+The first private message uses the preview's `assessment`, or the review's `portfolio_context`, `outlook` and `uncertainty`. Write each as one short, self-contained sentence. Put a decisive caveat or funding condition in the sentence it qualifies. Keep the detailed evidence, scenarios and comparisons in their existing report fields for follow-up questions.
+
 For supplied structured fundamental or screening data, use the [pure investment tools](../../references/research/structured-tools.md). Preserve their point-in-time bounds and coverage; they do not replace source research.

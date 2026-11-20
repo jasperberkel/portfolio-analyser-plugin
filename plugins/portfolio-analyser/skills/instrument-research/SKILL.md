@@ -18,3 +18,5 @@ For a standalone request use explicitly supplied data and produce a draft only. 
 Before research read the shared [connector reference](../../references/research/connectors.md) and [evidence policy](../../references/research/evidence.md). Choose suitable tools available in this host. Public sources are the working default; optional native MCP access is configured separately. Missing decisive data remain explicit gaps, not invented facts.
 
 For supplied structured fundamental or screening data, use the [pure investment tools](../../references/research/structured-tools.md). Preserve their point-in-time bounds and coverage; they do not replace source research.
+
+When liquidity or cash generation could change the case for a stock, obtain the dated issuer figures through the configured source path. Compare cash with short-term obligations and operating cash generation with investment spending. Explain a material change in its business context. A cash balance below current liabilities alone does not establish financial distress.

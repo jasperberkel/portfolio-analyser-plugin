@@ -553,6 +553,13 @@ def prepared(folder, value):
     result = _legacy_prepared(folder, value)
     if is_v2(folder):
         result["contract_version"] = 2
+        cutoff = research_v2.stamp(read(Path(folder) / "context.json")["research_cutoff"])
+        result["sources_requiring_date_check"] = [
+            {"report_id": report["id"], "source_id": source["source_id"]}
+            for report in value["dashboard"]["reports"]
+            for source in (report.get("research_data") or {}).get("sources", [])
+            if source["published_at"] is None and research_v2.stamp(source["accessed_at"]) > cutoff
+        ]
         write(Path(folder) / "strategy" / "input.json", result)
     return result
 

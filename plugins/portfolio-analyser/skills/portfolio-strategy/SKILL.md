@@ -35,6 +35,12 @@ Retain the full stored plan on later runs. New daily research alone does not jus
 
 ## Evaluate alternatives and evidence
 
+For a proposed investment or a material change in allocation, identify the assumption that would reverse the decision. Check the strongest dated evidence against it. Use the existing follow-up round if resolving that specific contradiction could change the proposal. Keep a candidate under observation when the deciding fact remains unavailable.
+
+The local workflow flags included sources first accessed after cutoff with no known publication time in `sources_requiring_date_check`. Use a flagged source for a decisive claim only when its cited filing, dated release or archived observation establishes availability by the cutoff. A reporting period alone cannot establish availability. If other dated evidence supports a conclusion, use that evidence. Record the unresolved gap when it changes the recommendation.
+
+For each material proposal, retain its purpose, observable measure of success, comparison and review date or event in the saved reasoning. For example, assess a diversification proposal by combined direct and fund exposure. At a subsequent review, revisit the original measure when matching dated evidence is available. Describe a proposed effect as hypothetical and an observed exposure change as observed. Attribute a realized return to the user only with execution and cash-flow evidence. Use the original rationale for older reports and leave an unspecified benchmark open.
+
 Before proposing a reallocation, compare the relevant alternatives, including **no change**. For crypto, consider BTC-only, ETH-only and proportional reductions when relevant. Size alone is not a relative investment thesis. Explain the gain, sacrifice, relative evidence and portfolio effect; do not implicitly favor a less-researched instrument.
 
 Distinguish business/protocol health from valuation and expected price return. Missing valuation prevents unsupported bargain or upside claims; it need not prevent an explicitly concentration-based reduction. Read available research across positions and avoid strong relative conclusions where coverage is unequal. Another stock name need not diversify shared sector exposure, and a crypto-to-equity shift need not reduce overall market risk.

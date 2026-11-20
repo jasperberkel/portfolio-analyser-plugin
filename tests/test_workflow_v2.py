@@ -266,7 +266,14 @@ class V2Tests(unittest.TestCase):
                 "reports": [{"analysis_type": t} for t in c.TYPES],
             },
         }
+        report = prepared["dashboard"]["reports"][0]
+        report.update(id="test-report", research_data={"sources": [
+            {"source_id": "late", "published_at": None, "accessed_at": "2099-01-01T00:00:00Z"},
+            {"source_id": "archived", "published_at": None, "accessed_at": self.ctx["research_cutoff"]},
+            {"source_id": "dated", "published_at": self.ctx["research_cutoff"], "accessed_at": "2099-01-01T00:00:00Z"},
+        ]})
         task = w.prepared(self.path, prepared)
+        self.assertEqual(task["sources_requiring_date_check"], [{"report_id": "test-report", "source_id": "late"}])
         self.assertEqual(task["contract_version"], 2)
         request = {
             "contract_version": 2,
