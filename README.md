@@ -39,6 +39,7 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 - `portfolio-advice` shows published suggestions and explains an earlier recommendation or alert using its original evidence
 - `earnings-analysis`: one-off and scheduled earnings previews, comparable actuals, revisions and dated scenarios
 - `earnings-monitor`: authenticated stock tracking, delivery modes and the persistent event workflow
+- `instrument-monitor`: manage watched instruments and check for material changes in their investment theses
 - `portfolio-import`: import portfolio documents with their report and continue to analysis with the analysis permission
 - `market-discovery-research`: portfolio-independent market radar and up to eight preliminary candidates
 - `instrument-research`: facts for assigned holdings or new candidates, with asset-specific evidence
@@ -46,7 +47,7 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 - `portfolio-risk-research`: concentration, fund overlap and existing-plan deviations after holdings research
 - `portfolio-strategy`: draft a durable allocation plan and justified next steps from supplied evidence
 - `run-analysis`: orchestrate dependent research and atomically publish research, strategy and any plan revision
-- `portfolio-analyser-setup`: connect the personal portfolio service; configure profiles or a recurring job when explicitly requested
+- `portfolio-analyser-setup`: connect the personal service and set up requested recurring instrument checks or full portfolio analyses
 
 ## Prerequisite
 
@@ -151,6 +152,6 @@ Portable host tests and model-routing evals live in `tests/thomas/`. Set `THOMAS
 
 Update the private service and plugin together: V2 workflow methodology revision 2 adds investment contract 1. Existing reports and plans remain readable; no monitoring is enabled by migration. Structured plan rules and proposals are optional historical data, but new complete strategy responses explicitly return a proposal or null. The service independently checks funding and combined exposures before publication.
 
-Candidate history persists across quiet or skipped runs, with original hypotheses, source dates and thesis IDs. The independent radar receives only discovery history. Candidates are not watches. `investment-monitor` enables material thesis-event monitoring only on an explicit request, using the existing private host wake and receipt-backed delivery. Its default cadence is daily and its leased batches are bounded. Price signals do not create orders or allocation revisions.
+Candidate history persists across quiet or skipped runs, with original hypotheses, source dates and thesis IDs. The independent radar receives only discovery history. Use `instrument-monitor` to manage explicit watches and check material events. Use `portfolio-analyser-setup` to arrange recurring checks through the personal host scheduler. Material-event deliveries use the private chat and a verified receipt.
 
 The new pure tools require supplied source data; no global feed is installed. See [structured tools](plugins/portfolio-analyser/references/research/structured-tools.md). No third-party day-trading code is vendored; the implementation uses the documented SEC format and our existing contracts. Networkless tests cover cutoff-safe normalization, coverage, candidate continuity and portfolio proposals. Real-model eval runs remain a separate request.

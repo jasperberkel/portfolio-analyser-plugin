@@ -1,6 +1,6 @@
 ---
 name: portfolio-analyser-setup
-description: Set up or connect the Trading-Paket and its personal portfolio service. Use for “Richte das Trading-Paket ein”, account connection, and explicitly requested recurring analysis jobs.
+description: Connect the Trading-Paket and manage requested recurring instrument checks or full portfolio analyses. Use for personal setup and for requests such as “Prüfe Siemens täglich”.
 ---
 
 # Portfolio Analyser Setup
@@ -16,13 +16,31 @@ Connect the installed plugin through native authenticated HTTP MCP, verify MCP, 
 3. For standalone Codex or Claude Code without a connect action, use the installed connection settings and the host's native OAuth login flow. Prefer the active client's browser sign-in API. The bundled `scripts/configure_mcp.py --host codex|claude` supports CLI hosts. Run it on the user's behalf only when needed, accepting consent exclusively in the user's browser. An existing working connection is reused. Never remove a connection, copy a token, or invoke an operator login/delegated system setup for a personal connector. A scope challenge on a live connection uses the same personal connect action in this turn.
 4. Full setup requests `portfolio:read`, `portfolio:import`, and `portfolio:analyse` together in one explicit browser consent. This covers the stock earnings monitor. The separate full daily portfolio analysis remains opt-in. A narrower existing grant stays narrow until the user approves the missing permissions. On denial or unavailable connectivity, report the specific state without retrying or publishing anything.
 
-## Verify workflow and install profiles
+## Recurring instrument checks
+
+When the user requests repeated instrument checks, use [instrument-monitor](../instrument-monitor/SKILL.md) for any requested watchlist changes. Use the user's private Trading connection. An instrument check can use explicit watches with an empty portfolio. A request to add a watch alone only updates the list.
+
+Read `get_investment_monitoring` and inspect the host's existing personal jobs. Use one instrument-monitor job per account for its holdings and watchlist. Reuse it when the user adds another instrument. If the requested scope or timing is narrower than this shared job permits, resolve that difference with the user before changing it. Keep an existing timetable unless the request changes it. For a new recurring monitor, default to daily in the user's time zone.
+
+Use the host's personal scheduler. On Emily, follow the native `schedules-and-watches` guide and use `manage_personal_context` with `schedule_list`, then `schedule_create` or `schedule_update` as needed. Use the title `Trading - instrument-monitor` and the owner's private chat. An existing job that explicitly invokes the former `investment-monitor` skill can be updated in place. Public issuer news can change independently of the connected account, so omit a connection-change trigger. Give the job this instruction:
+
+> Run the installed instrument-monitor skill for my Trading holdings and watchlist. Process due checks and deliver new material events in this private chat. Stay quiet when there is no new event.
+
+After saving or reusing a dedicated job, use `set_investment_monitoring` for any needed enrollment or interval change. The service accepts 6–168 hours and measures eligibility from completion. Keep a service interval shorter than the gap between host runs (for example 6 hours for a daily timetable) so a check finishing late does not skip the next day's run. At gaps of 6 hours or less, explain that an invocation can find research still ineligible. On hosts with a shared package wake, reuse that wake and set the requested interval on the service instead. For legacy Thomas use its existing `bind_personal_wake({"package":"portfolio-analyser"})` binding.
+
+Verify service enrollment and the enabled host job with its next run before confirming. If setup is incomplete, identify which part was saved. When stopping recurring checks, disable instrument monitoring (this cancels its pending alerts) and pause its dedicated job, preserving the watchlist and any shared earnings wake. These operations require neither a full portfolio analysis nor research profile installation.
+
+## Full portfolio analysis only
+
+Apply the following workflow verification, job matching and migration only to an explicitly requested full portfolio analysis.
+
+### Verify workflow and install profiles
 
 Resolve `<plugin-root>/scripts/workflow.py` and run its discover command. Require run-analysis plus one strategy and the explicit V2 dependency graph with five research tasks; never infer jobs from name suffixes. Verify get_analysis_context, prepare_strategy_context and publish_analysis_run are available on the connected server. Verify all six Run Analysis tools, the import tools when needed, and context contract_version 2 before scheduling.
 
 For Codex, run `python3 <plugin-root>/scripts/install_agent_profiles.py <project-root>` to install/update only the two managed project profiles. Do not overwrite an unmanaged collision. Claude Code uses the plugin's bundled agents. Read [host adapters](../../references/agent-adapters.md) and disclose the instruction-based fallback when native profile selection is unavailable. Agent setup is part of an explicitly requested workflow setup, not a side effect of plugin installation.
 
-## Inspect existing jobs
+### Inspect existing jobs
 
 Use the host scheduling tool and inspect saved jobs first. The single target is:
 
@@ -34,7 +52,7 @@ Match an existing target by exact canonical marker, exact skill invocation or ex
 
 For migration, identify only exact legacy markers or skill invocations for finanzen-news-research, market-opportunity-research, portfolio-position-research, portfolio-briefing and portfolio-strategy, or their exact `Portfolio Analyser - <skill>` names. Also recognize the legacy display names `Portfolio Analyser - Position Research`, `Portfolio Analyser - Market Opportunities`, and `Portfolio Analyser - Briefing`. Preserve unrelated jobs and notification preferences. Do not match vague research/briefing text.
 
-## Verify and migrate the schedule
+### Verify and migrate the schedule
 
 Default proposal: one complete daily run at 10:00 in the user's detected timezone. Show cadence, timezone, new/existing target and exact legacy jobs to pause. Obtain the user's schedule preference only when it has not already been provided. Plugin installation alone does not authorize schedule creation or changes.
 

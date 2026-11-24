@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { createHash } from "node:crypto";
 
 export async function researchInstructions(pkg, phase) {
-  if (phase === "investment") return readFile(join(pkg, "references/research/investment-monitor.md"), "utf8");
+  if (phase === "investment") return readFile(join(pkg, "references/research/instrument-monitor.md"), "utf8");
   const skill = ["calendar", "probe"].includes(phase) ? "earnings-monitor" : "earnings-analysis";
   const files = [
     "skills/" + skill + "/SKILL.md",

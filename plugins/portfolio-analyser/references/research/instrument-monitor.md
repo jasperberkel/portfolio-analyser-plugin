@@ -1,4 +1,4 @@
-# Material investment events
+# Material instrument events
 
 Investigate only the assigned public instrument identities and the fixed `research_cutoff`. Cover every assigned identity once in `researched`; a failed source search remains an explicit gap. Current holdings amounts and allocation targets are not supplied and must not be sent to search providers.
 
