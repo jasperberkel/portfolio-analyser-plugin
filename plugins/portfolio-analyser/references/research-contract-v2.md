@@ -20,14 +20,15 @@ Thesis: {thesis_id, claim, status, first_seen_at, changed_at, counterevidence, i
 
 ## Payloads
 
-- **market:** {schema_version, kind: "market", sources, context_markdown, candidates, deferred}. Each candidate is {instrument, hypothesis, risks, questions, source_ids}; risks/questions/deferred are text lists. At most eight unique candidates, each sourced. Coverage is input.selected (empty for this portfolio-independent scan).
+- **radar:** {schema_version, kind: "radar", sources, context_markdown}. Keep the dated market overview and the changes section in context_markdown.
+- **discovery:** {schema_version, kind: "discovery", sources, candidates, deferred}. Each candidate is {instrument, hypothesis, risks, questions, source_ids}; risks/questions/deferred are text lists. At most eight unique candidates, each sourced. Coverage is input.selected (empty for this portfolio-independent scan).
 - **instruments:** {schema_version, kind: "instruments", sources, items, hypotheses}. Each item is {instrument_id, instrument, content_markdown, facts, events, exposures, gaps}. hypotheses is a neutral text list; carry supplied candidate hypotheses into it. One item per assigned instrument.
 - **valuation:** {schema_version, kind: "valuation", sources, items}. Each item is {instrument_id, health, valuation, thesis_change, content_markdown, theses, source_ids, gaps}. Health, valuation and thesis change are separate concise judgments with uncertainty. One item per assigned instrument.
 - **risk:** {schema_version, kind: "risk", sources, items, calculations, findings}. Each item is {instrument_id, content_markdown, source_ids, gaps}. Copy input.calculations unchanged, then explain it and its limits. findings is a text list and covers portfolio-level risks including cash. One item per held instrument, even with sparse data.
 
 ## Follow-up and history
 
-Read previous_state as historical evidence, never as fresh data. Only the assigned instrument subset is provided. Preserve its tracked events/theses. A follow-up contains questions and the original scope, new input_hash and current predecessor versions; return a full replacement. Never read sibling task files. The helper invalidates downstream tasks and allows only one follow-up round. No strategy-originated follow-up may target market.
+Read previous_state as historical evidence, never as fresh data. Only the assigned instrument subset is provided. Preserve its tracked events/theses. A follow-up contains questions and the original scope, new input_hash and current predecessor versions; return a full replacement. Never read sibling task files. The helper invalidates downstream tasks and allows only one follow-up round. No strategy-originated follow-up may target market or finder.
 
 ## Strategy V2
 
@@ -35,6 +36,6 @@ The document payload stays Markdown V4. Use the strategy result in draft-contrac
 
 ## Durable candidate history
 
-The service supplies `candidate_memory` at context level, isolated from allocations. Market inputs receive only the discovery projection as `candidate_history`. Instrument and valuation `previous_state` restore a previously researched candidate even after intervening runs omitted it. Source IDs are namespaced during restoration; thesis/event IDs and original timestamps remain unchanged. These historical records never become fresh evidence. Publication appends candidate observations in the same transaction as all reports. Candidate history does not authorize monitoring.
+The service supplies `candidate_memory` at context level, isolated from allocations. Finder inputs receive only the discovery projection as `candidate_history`. Instrument and valuation `previous_state` restore a previously researched candidate even after intervening runs omitted it. Source IDs are namespaced during restoration; thesis/event IDs and original timestamps remain unchanged. These historical records never become fresh evidence. Publication appends candidate observations in the same transaction as all reports. Candidate history does not authorize monitoring.
 
-Market candidates optionally carry `review_trigger` (specific research condition) and `review_after` (timezone-aware future date or null). Methodology revision 2 asks for a concrete trigger. These fields are preserved in the journal without creating a schedule.
+Finder candidates optionally carry `review_trigger` (specific research condition) and `review_after` (timezone-aware future date or null). Methodology revision 2 asks for a concrete trigger. These fields are preserved in the journal without creating a schedule.

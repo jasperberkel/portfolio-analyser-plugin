@@ -3,12 +3,21 @@
   "steps": [
     {
       "task_id": "market",
-      "skill": "market-discovery-research",
+      "skill": "market-radar",
       "stage": "research",
       "depends_on": [],
-      "produces": "market.discovery",
-      "payload_type": "market",
-      "methodology_revision": "2"
+      "produces": "market.radar",
+      "payload_type": "radar",
+      "methodology_revision": "3"
+    },
+    {
+      "task_id": "finder",
+      "skill": "instrument-finder",
+      "stage": "research",
+      "depends_on": [],
+      "produces": "instrument.discovery",
+      "payload_type": "discovery",
+      "methodology_revision": "3"
     },
     {
       "task_id": "holdings",
@@ -17,22 +26,22 @@
       "depends_on": [],
       "produces": "instrument.research",
       "payload_type": "instruments",
-      "methodology_revision": "2"
+      "methodology_revision": "3"
     },
     {
       "task_id": "candidates",
       "skill": "instrument-research",
       "stage": "research",
       "depends_on": [
-        "market"
+        "finder"
       ],
       "produces": "instrument.research",
       "payload_type": "instruments",
-      "methodology_revision": "2"
+      "methodology_revision": "3"
     },
     {
       "task_id": "valuation",
-      "skill": "valuation-thesis-research",
+      "skill": "instrument-evaluation",
       "stage": "research",
       "depends_on": [
         "holdings",
@@ -40,7 +49,7 @@
       ],
       "produces": "valuation.thesis",
       "payload_type": "valuation",
-      "methodology_revision": "2"
+      "methodology_revision": "3"
     },
     {
       "task_id": "risk",
@@ -51,7 +60,7 @@
       ],
       "produces": "portfolio.risk",
       "payload_type": "risk",
-      "methodology_revision": "2"
+      "methodology_revision": "3"
     },
     {
       "task_id": "strategy",
@@ -59,6 +68,7 @@
       "stage": "strategy",
       "depends_on": [
         "market",
+        "finder",
         "holdings",
         "candidates",
         "valuation",
@@ -66,7 +76,7 @@
       ],
       "produces": "portfolio.strategy",
       "payload_type": "strategy",
-      "methodology_revision": "2"
+      "methodology_revision": "3"
     }
   ]
 }

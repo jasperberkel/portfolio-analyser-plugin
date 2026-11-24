@@ -72,7 +72,7 @@ At round 0 only, you may instead return:
 }
 ```
 
-Group all questions by task_id in one request per task. Ask only relevant registered researchers whose reports are included, not excluded evidence. Use holdings/candidates for instrument facts, valuation for thesis checks and risk for portfolio structure. Never send strategy requests to market. Do not include holdings, portfolio weights, proposed trades or the full strategy in those requests. At round 1 finalize with remaining gaps and qualified conclusions; no further research round. An unresolvable factual question is not an instruction to manufacture an answer or trade.
+Group all questions by task_id in one request per task. Ask only relevant registered researchers whose reports are included, not excluded evidence. Use holdings/candidates for instrument facts, valuation for thesis checks and risk for portfolio structure. Never send strategy requests to market or finder. Do not include holdings, portfolio weights, proposed trades or the full strategy in those requests. At round 1 finalize with remaining gaps and qualified conclusions; no further research round. An unresolvable factual question is not an instruction to manufacture an answer or trade.
 
 ## Investment contract 1
 

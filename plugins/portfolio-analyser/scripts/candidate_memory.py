@@ -6,8 +6,8 @@ from copy import deepcopy
 def merge_candidates(previous, reports, observed_at):
     memory = {r["instrument_id"]: deepcopy(r) for r in previous}
     by_type = {r["analysis_type"]: r["research_data"] for r in reports}
-    market = by_type.get("market.discovery", {})
-    for candidate in market.get("candidates", []):
+    discovery = by_type.get("instrument.discovery", by_type.get("market.discovery", {}))
+    for candidate in discovery.get("candidates", []):
         key = candidate["instrument"]["instrument_id"]
         row = memory.setdefault(
             key, {"instrument_id": key, "first_seen_at": observed_at, "research": {}}
@@ -17,7 +17,7 @@ def merge_candidates(previous, reports, observed_at):
             last_seen_at=observed_at,
             sources=[
                 deepcopy(s)
-                for s in market["sources"]
+                for s in discovery["sources"]
                 if s["source_id"] in candidate["source_ids"]
             ],
         )
@@ -55,7 +55,7 @@ def merge_candidates(previous, reports, observed_at):
     return [memory[k] for k in sorted(memory)]
 
 
-def radar_history(memory):
+def discovery_history(memory):
     # Valuation judgments and personal selection must not steer independent discovery.
     return [
         {

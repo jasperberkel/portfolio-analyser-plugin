@@ -98,7 +98,7 @@ def result(task, *, candidates=None):
     )
     kind = task["payload_type"]
     data = {"schema_version": 1, "kind": kind, "sources": [source]}
-    if kind == "market":
+    if kind in ("market", "radar"):
         changes = (
             "Keine wesentlichen Änderungen festgestellt."
             if task["previous_state"]
@@ -106,8 +106,9 @@ def result(task, *, candidates=None):
         )
         section = "## Marktrelevante Änderungen seit dem letzten Radar\n\n" + changes
         value["content_markdown"] += "\n\n" + section
+        data["context_markdown"] = "Speichertechnik prüfen.\n\n" + section
+    if kind in ("market", "discovery"):
         data.update(
-            context_markdown="Speichertechnik prüfen.\n\n" + section,
             deferred=[],
             candidates=[
                 {
@@ -120,7 +121,7 @@ def result(task, *, candidates=None):
                 for i in ([BATTERY] if candidates is None else candidates)
             ],
         )
-    else:
+    if kind not in ("market", "radar", "discovery"):
         data["items"] = []
         for instrument in task["instruments"]:
             item = {
@@ -204,11 +205,14 @@ def result(task, *, candidates=None):
     return value
 
 
-def bundle(ctx, candidates=None):
-    flow = c.default_workflow()
+def bundle(ctx, candidates=None, *, workflow=None):
+    flow = workflow or c.default_workflow()
     run_id = str(uuid.uuid4())
     rows = {}
-    for task_id in ("market", "holdings", "candidates", "valuation", "risk"):
+    for step in flow["steps"]:
+        if step["stage"] != "research":
+            continue
+        task_id = step["task_id"]
         task = c.build_input(ctx, flow, run_id, task_id, rows)
         row = (
             c.empty_result(task)

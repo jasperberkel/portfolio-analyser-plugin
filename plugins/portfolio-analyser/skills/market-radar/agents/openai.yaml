@@ -1,0 +1,4 @@
+interface:
+  display_name: "Marktradar"
+  short_description: "Belegte Marktveränderungen und ihre Auswirkungen"
+  default_prompt: "Nutze $market-radar für einen Überblick über die wichtigsten Marktveränderungen."

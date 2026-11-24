@@ -1,6 +1,6 @@
 # Portfolio Analyser Plugin
 
-The package supplies twelve native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs five pure tools. `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. The additional tools normalize supplied SEC companyfacts, screen explicit evidence and evaluate dated allocation proposals. None starts a model or executes trades.
+The package supplies thirteen native Agent Skills. Each host discovers the name and description from its installed skill files and reads the selected SKILL.md and references on demand. The accompanying stdio MCP server runs five pure tools. `build_portfolio_snapshot` reconciles normalized import manifests and `portfolio_exposure` computes direct and indirect weights. The additional tools normalize supplied SEC companyfacts, screen explicit evidence and evaluate dated allocation proposals. None starts a model or executes trades.
 
 ## Local host installation
 
@@ -41,9 +41,10 @@ Register the installed `portfolio-advisory` executable as the client's stdio com
 - `earnings-monitor`: authenticated stock tracking, delivery modes and the persistent event workflow
 - `instrument-monitor`: manage watched instruments and check for material changes in their investment theses
 - `portfolio-import`: import portfolio documents with their report and continue to analysis with the analysis permission
-- `market-discovery-research`: portfolio-independent market radar and up to eight preliminary candidates
+- `market-radar`: a dated overview of material market developments
+- `instrument-finder`: search for up to eight candidate instruments independently of a portfolio or market report
 - `instrument-research`: facts for assigned holdings or new candidates, with asset-specific evidence
-- `valuation-thesis-research`: comparable valuation and durable thesis checks after instrument research
+- `instrument-evaluation`: comparable valuation and durable thesis checks after instrument research
 - `portfolio-risk-research`: concentration, fund overlap and existing-plan deviations after holdings research
 - `portfolio-strategy`: draft a durable allocation plan and justified next steps from supplied evidence
 - `run-analysis`: orchestrate dependent research and atomically publish research, strategy and any plan revision
@@ -63,7 +64,7 @@ Invoke `$portfolio-import` with the portfolio documents (Claude Code: `/portfoli
 
 ## Research and data access
 
-Ask `$market-discovery-research` for general market developments and preliminary candidates. Supply an explicit instrument list for `$instrument-research`, dossiers for `$valuation-thesis-research`, or holdings and instrument evidence for `$portfolio-risk-research`. Standalone skills return drafts; run-analysis alone loads app context and publishes.
+Ask `$market-radar` for market developments or `$instrument-finder` for candidate ideas. The finder can use a supplied overview and also works without one. Supply an explicit instrument list for `$instrument-research`, dossiers for `$instrument-evaluation`, or holdings and instrument evidence for `$portfolio-risk-research`. Standalone skills return drafts; run-analysis alone loads app context and publishes.
 
 The three old research skills are replaced. Existing reports remain archived. Public primary sources are the default. Native MCP providers can later be configured/authenticated in the host, with their tools and fallback rules maintained in one [connector reference](plugins/portfolio-analyser/references/research/connectors.md). No provider subscription, Python connection adapter or proxy is required.
 
@@ -101,13 +102,13 @@ plugins/portfolio-analyser/
 
 ## Orchestrated analysis (plugin 0.8.0)
 
-Invoke `$run-analysis` (Claude Code: `/portfolio-analyser:run-analysis`). It loads a consistent app context, starts independent market and holdings work concurrently, then schedules candidates, valuation and risk by dependency readiness, prepares the exact evidence for Strategy-Agent, permits one targeted follow-up round, then atomically publishes all research, strategy and an optional complete plan revision. Every research step is required; one retry is permitted before the run stops without publication.
+Invoke `$run-analysis` (Claude Code: `/portfolio-analyser:run-analysis`). It loads a consistent app context, starts the radar, finder and holdings research independently, then schedules candidates, valuation and risk by dependency readiness, prepares the exact evidence for Strategy-Agent, permits one targeted follow-up round, then atomically publishes all research, strategy and an optional complete plan revision. Every research step is required; one retry is permitted before the run stops without publication.
 
 Research and portfolio-strategy skills always create drafts, including individual invocations. They receive partitioned input files and never connect to the portfolio app. The full strategy reads complete reports, not only worker summaries. The long-term plan changes only with substantive justification.
 
 The service must expose the V2 context, preparation, publication and detail tools required by the run-analysis skill. Verify a complete manual run before migrating jobs. `.analysis-runs/` contains ignored local progress and drafts; it is not an autonomous recovery daemon.
 
-The explicit graph distinguishes role, task and report. Five research tasks publish four reports: holdings and candidates merge into one instrument report. A coordinated contract change is required to extend the graph. See [orchestration](plugins/portfolio-analyser/references/orchestration.md) and [V2 contract](plugins/portfolio-analyser/references/research-contract-v2.md). This plugin requires the V2 analysis contract.
+The explicit graph distinguishes role, task and report. Six research tasks publish five reports. The radar and finder each publish a report. Holdings and candidate dossiers merge into one instrument report. A coordinated contract change is required to extend the graph. See [orchestration](plugins/portfolio-analyser/references/orchestration.md) and [V2 contract](plugins/portfolio-analyser/references/research-contract-v2.md). This plugin requires the V2 analysis contract.
 
 Shared role playbooks have native Claude adapters and an installer for managed Codex project profiles. Where native role selection is unavailable, workers load the playbooks explicitly. This fallback does not enforce tool isolation. See [host adapters](plugins/portfolio-analyser/references/agent-adapters.md).
 
@@ -152,6 +153,6 @@ Portable host tests and model-routing evals live in `tests/thomas/`. Set `THOMAS
 
 Update the private service and plugin together: V2 workflow methodology revision 2 adds investment contract 1. Existing reports and plans remain readable; no monitoring is enabled by migration. Structured plan rules and proposals are optional historical data, but new complete strategy responses explicitly return a proposal or null. The service independently checks funding and combined exposures before publication.
 
-Candidate history persists across quiet or skipped runs, with original hypotheses, source dates and thesis IDs. The independent radar receives only discovery history. Use `instrument-monitor` to manage explicit watches and check material events. Use `portfolio-analyser-setup` to arrange recurring checks through the personal host scheduler. Material-event deliveries use the private chat and a verified receipt.
+Candidate history persists across quiet or skipped runs, with original hypotheses, source dates and thesis IDs. The finder receives public discovery history and can use a previous market overview. Use `instrument-monitor` to manage explicit watches and check material events. Use `portfolio-analyser-setup` to arrange recurring checks through the personal host scheduler. Material-event deliveries use the private chat and a verified receipt.
 
 The new pure tools require supplied source data; no global feed is installed. See [structured tools](plugins/portfolio-analyser/references/research/structured-tools.md). No third-party day-trading code is vendored; the implementation uses the documented SEC format and our existing contracts. Networkless tests cover cutoff-safe normalization, coverage, candidate continuity and portfolio proposals. Real-model eval runs remain a separate request.

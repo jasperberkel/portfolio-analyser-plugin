@@ -520,7 +520,7 @@ class DiscoveryAndProfileTests(unittest.TestCase):
     def test_installed_plugin_contracts_discover(self):
         discovered = workflow.discover(PLUGIN)
         self.assertEqual(sum(s["stage"] == "strategy" for s in discovered["steps"]), 1)
-        self.assertEqual(sum(s["stage"] == "research" for s in discovered["steps"]), 5)
+        self.assertEqual(sum(s["stage"] == "research" for s in discovered["steps"]), 6)
         self.assertIn("portfolio-strategy", {s["skill"] for s in discovered["steps"]})
 
     def test_unknown_versions_inputs_duplicate_types_and_cycles_rejected(self):

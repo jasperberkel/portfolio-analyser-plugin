@@ -39,7 +39,7 @@ def refresh(folder, state):
             state["run_id"],
             task_id,
             parents,
-            followup_round=0 if task_id == "market" else state["followup_round"],
+            followup_round=0 if task_id in ("market", "finder") else state["followup_round"],
             questions=record.get("questions", []),
         )
         api().write(Path(folder) / task_id / "input.json", task)
@@ -80,7 +80,8 @@ def initialize(folder, context, workflow):
         "source_fingerprint": context["source_fingerprint"],
         "followup_round": 0,
         "tasks": {
-            k: {"status": "blocked", "attempts": 0} for k in c.TASKS if k != "strategy"
+            step["task_id"]: {"status": "blocked", "attempts": 0}
+            for step in workflow["steps"] if step["stage"] == "research"
         },
         "strategy_status": "pending",
         "stopped": False,
@@ -174,7 +175,7 @@ def invalidate(folder, task_ids, questions=None):
     state = api().read_state(folder)
     invalid = set(task_ids)
     c.require(
-        invalid <= state["tasks"].keys() and "market" not in invalid,
+        invalid <= state["tasks"].keys() and invalid.isdisjoint({"market", "finder"}),
         "Invalid follow-up target",
     )
     while True:
@@ -236,7 +237,7 @@ def accept_strategy(folder, value, legacy_accept):
             target = request["task_id"]
             c.require(
                 target in state["tasks"]
-                and target != "market"
+                and target not in ("market", "finder")
                 and target not in questions,
                 "Invalid or private follow-up target",
             )

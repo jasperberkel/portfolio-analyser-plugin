@@ -32,23 +32,25 @@ class V2Tests(unittest.TestCase):
 
     def test_dependencies_and_parallel_readiness(self):
         self.assertEqual(
-            set(w.read_state(self.path)["ready_tasks"]), {"market", "holdings"}
+            set(w.read_state(self.path)["ready_tasks"]), {"market", "finder", "holdings"}
         )
         with self.assertRaises(ValueError):
             w.start(self.path, "valuation")
         self.finish("holdings")
         self.assertEqual(
-            set(w.read_state(self.path)["ready_tasks"]), {"market", "risk"}
+            set(w.read_state(self.path)["ready_tasks"]), {"market", "finder", "risk"}
         )
         self.finish("risk")  # Does not wait for candidate valuation.
-        self.finish("market")
+        self.finish("finder")
         self.finish("candidates")
         self.finish("valuation")
+        self.assertIn("market", w.read_state(self.path)["ready_tasks"])
+        self.finish("market")
         draft = w.draft(self.path)
         reports = c.aggregate(
             {r["task_id"]: r for r in draft["research"]}, draft["run_id"]
         )
-        self.assertEqual(len(reports), 4)
+        self.assertEqual({r["analysis_type"] for r in reports}, set(c.TYPES))
         instruments = next(
             r for r in reports if r["analysis_type"] == "instrument.research"
         )["research_data"]
@@ -61,7 +63,7 @@ class V2Tests(unittest.TestCase):
         )
 
     def test_duplicate_candidates_reuse_held_dossiers(self):
-        self.finish("market", candidates=[SOLAR])
+        self.finish("finder", candidates=[SOLAR])
         state = w.read_state(self.path)
         self.assertEqual(state["tasks"]["candidates"]["status"], "complete")
         self.assertEqual(state["tasks"]["candidates"]["attempts"], 0)
@@ -84,9 +86,10 @@ class V2Tests(unittest.TestCase):
         ctx["dashboard"]["snapshot"]["cash_value"] = "1000"
         state = w.initialize(other, ctx, c.default_workflow())
         self.assertEqual(state["tasks"]["holdings"]["status"], "complete")
-        market = w.start(other, "market")
-        w.write(other / "market/result.json", result(market, candidates=[]))
-        state = w.collect(other, "market")
+        finder = w.start(other, "finder")
+        w.write(other / "finder/result.json", result(finder, candidates=[]))
+        state = w.collect(other, "finder")
+        self.assertIn("market", state["ready_tasks"])
         self.assertEqual(state["tasks"]["candidates"]["status"], "complete")
         self.assertEqual(state["tasks"]["valuation"]["status"], "complete")
         risk = w.start(other, "risk")
@@ -106,6 +109,36 @@ class V2Tests(unittest.TestCase):
         held = w.start(self.path, "holdings")
         for text in ("PRIVATE", "market_value", "cash_value", "quantity"):
             self.assertNotIn(text, json.dumps(held))
+
+    def test_finder_needs_neither_portfolio_nor_radar(self):
+        ctx = {"research_cutoff": self.ctx["research_cutoff"]}
+        flow = c.default_workflow()
+        run = str(uuid.uuid4())
+        task = c.build_input(ctx, flow, run, "finder", {})
+        self.assertNotIn("market_context", task)
+        self.assertEqual(task["dependencies"], {})
+        self.assertIsNone(task["snapshot_id"])
+        for private_key in ("plan", "positions", "dashboard", "current_portfolio"):
+            self.assertNotIn(private_key, task)
+        row = result(task)
+        c.validate_result(row, task)
+        self.assertNotIn("context_markdown", row["research_data"])
+        self.assertEqual(row["research_data"]["candidates"][0]["instrument"], BATTERY)
+        radar = result(c.build_input(ctx, flow, run, "market", {}))
+        self.assertNotIn("candidates", radar["research_data"])
+        self.assertEqual(task, c.build_input(ctx, flow, run, "finder", {"market": radar}))
+
+    def test_previous_combined_report_supplies_optional_radar_context(self):
+        old = bundle(self.ctx, workflow=c.default_workflow(previous=True))
+        reports = c.aggregate({r["task_id"]: r for r in old["research"]}, old["run_id"])
+        ctx = {"research_cutoff": self.ctx["research_cutoff"],
+               "previous_reports": {r["analysis_type"]: r for r in reports}}
+        task = c.build_input(ctx, c.default_workflow(), old["run_id"], "finder", {})
+        baseline = task["market_context"]
+        self.assertEqual(baseline["context_markdown"],
+                         ctx["previous_reports"]["market.discovery"]["research_data"]["context_markdown"])
+        self.assertNotIn("candidates", baseline)
+        self.assertEqual(task["dependency_hashes"], {})
 
     def test_market_context_survives_successive_runs_without_candidates(self):
         flow = w.discover(ROOT)
@@ -130,7 +163,10 @@ class V2Tests(unittest.TestCase):
             row["content_markdown"] = "# Marktbericht\n\n" + section
             row["research_data"]["context_markdown"] = baseline + "\n\n" + section
             w.write(folder / "market/result.json", row)
-            state = w.collect(folder, "market")
+            w.collect(folder, "market")
+            finder = w.start(folder, "finder")
+            w.write(folder / "finder/result.json", result(finder, candidates=[]))
+            state = w.collect(folder, "finder")
             self.assertEqual(state["tasks"]["candidates"]["status"], "complete")
             for name in ("holdings", "valuation", "risk"):
                 task = w.start(folder, name)
@@ -139,7 +175,7 @@ class V2Tests(unittest.TestCase):
             draft = w.draft(folder)
             reports = c.aggregate({r["task_id"]: r for r in draft["research"]}, draft["run_id"])
             self.ctx["previous_reports"] = {r["analysis_type"]: r for r in reports}
-            report = self.ctx["previous_reports"]["market.discovery"]
+            report = self.ctx["previous_reports"]["market.radar"]
             self.assertEqual(report["content_markdown"], row["content_markdown"])
             prior = row["research_data"]
             self.assertEqual(report["research_data"], prior)
@@ -159,6 +195,7 @@ class V2Tests(unittest.TestCase):
 
     def test_retry_limit_and_invalidation(self):
         self.finish("market")
+        self.finish("finder")
         self.finish("holdings")
         self.finish("candidates")
         self.finish("valuation")
@@ -177,7 +214,7 @@ class V2Tests(unittest.TestCase):
             w.draft(self.path)
 
     def test_stale_descendant_rejected(self):
-        for task in ("market", "holdings", "candidates", "valuation", "risk"):
+        for task in ("market", "finder", "holdings", "candidates", "valuation", "risk"):
             self.finish(task)
         held = w.read(self.path / "holdings/accepted.json")
         held["content_markdown"] += " corrected"
@@ -256,7 +293,7 @@ class V2Tests(unittest.TestCase):
             c.validate_continuity(changed, history)
 
     def test_strategy_followup_and_frozen_publication(self):
-        for task_id in ("market", "holdings", "candidates", "valuation", "risk"):
+        for task_id in ("market", "finder", "holdings", "candidates", "valuation", "risk"):
             self.finish(task_id)
         prepared = {
             "source_fingerprint": self.ctx["source_fingerprint"],
@@ -282,8 +319,10 @@ class V2Tests(unittest.TestCase):
             "status": "needs_research",
             "requests": [{"task_id": "market", "questions": ["Portfolio?"]}],
         }
-        with self.assertRaises(ValueError):
-            w.accept_strategy(self.path, request)
+        for public_task in ("market", "finder"):
+            request["requests"][0]["task_id"] = public_task
+            with self.assertRaises(ValueError):
+                w.accept_strategy(self.path, request)
         request["requests"] = [
             {"task_id": "holdings", "questions": ["Marge nachprüfen."]}
         ]
@@ -310,7 +349,7 @@ class V2Tests(unittest.TestCase):
         packet = w.publication(self.path)
         self.assertEqual(packet["workflow"]["contract_version"], 2)
         self.assertEqual(packet, w.publication(self.path))
-        self.assertEqual(len(packet["research"]), 5)
+        self.assertEqual(len(packet["research"]), 6)
 
     def test_duplicate_holding_instruments_are_researched_once(self):
         ctx = context()

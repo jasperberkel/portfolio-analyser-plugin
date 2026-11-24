@@ -13,19 +13,29 @@ from decimal import Decimal, InvalidOperation
 
 PACKAGE = "research.core"
 LEGACY_TYPES = ("news.finanzen-net", "market.opportunity-research", "portfolio.position-research")
-TYPES = ("market.discovery", "instrument.research", "valuation.thesis", "portfolio.risk")
+TYPES = ("market.radar", "instrument.discovery", "instrument.research", "valuation.thesis", "portfolio.risk")
 TASKS = {
-    "market": ("market-discovery-research", [], TYPES[0], "market"),
-    "holdings": ("instrument-research", [], TYPES[1], "instruments"),
-    "candidates": ("instrument-research", ["market"], TYPES[1], "instruments"),
-    "valuation": ("valuation-thesis-research", ["holdings", "candidates"], TYPES[2], "valuation"),
-    "risk": ("portfolio-risk-research", ["holdings"], TYPES[3], "risk"),
+    "market": ("market-radar", [], "market.radar", "radar"),
+    "finder": ("instrument-finder", [], "instrument.discovery", "discovery"),
+    "holdings": ("instrument-research", [], "instrument.research", "instruments"),
+    "candidates": ("instrument-research", ["finder"], "instrument.research", "instruments"),
+    "valuation": ("instrument-evaluation", ["holdings", "candidates"], "valuation.thesis", "valuation"),
+    "risk": ("portfolio-risk-research", ["holdings"], "portfolio.risk", "risk"),
     "strategy": (
-        "portfolio-strategy",
-        ["market", "holdings", "candidates", "valuation", "risk"],
-        "portfolio.strategy",
-        "strategy",
+        "portfolio-strategy", ["market", "finder", "holdings", "candidates", "valuation", "risk"],
+        "portfolio.strategy", "strategy",
     ),
+}
+
+# The service also validates submissions from installed revision-2 clients.
+PREVIOUS_TASKS = {
+    "market": ("market-discovery-research", [], "market.discovery", "market"),
+    "holdings": TASKS["holdings"],
+    "candidates": ("instrument-research", ["market"], "instrument.research", "instruments"),
+    "valuation": ("valuation-thesis-research", ["holdings", "candidates"], "valuation.thesis", "valuation"),
+    "risk": TASKS["risk"],
+    "strategy": ("portfolio-strategy", ["market", "holdings", "candidates", "valuation", "risk"],
+                 "portfolio.strategy", "strategy"),
 }
 
 
@@ -78,7 +88,8 @@ def number(value):
     return result
 
 
-def default_workflow():
+def default_workflow(*, previous=False):
+    tasks = PREVIOUS_TASKS if previous else TASKS
     return {
         "contract_version": 2,
         "steps": [
@@ -89,9 +100,9 @@ def default_workflow():
                 "depends_on": deps,
                 "produces": output,
                 "payload_type": kind,
-                "methodology_revision": "2",
+                "methodology_revision": "2" if previous else "3",
             }
-            for task, (skill, deps, output, kind) in TASKS.items()
+            for task, (skill, deps, output, kind) in tasks.items()
         ],
     }
 
@@ -99,11 +110,11 @@ def default_workflow():
 def validate_workflow(flow):
     fields(flow, ("contract_version", "steps"))
     require(flow["contract_version"] == 2, "V2 server/plugin required")
-    require(
-        isinstance(flow["steps"], list) and len(flow["steps"]) == len(TASKS),
-        "Expected six explicit tasks",
-    )
-    require({s.get("task_id") for s in flow["steps"]} == set(TASKS), "Unknown/duplicate task")
+    steps = flow["steps"]
+    require(isinstance(steps, list) and all(isinstance(s, dict) for s in steps), "Expected task list")
+    ids = {s.get("task_id") for s in steps}
+    tasks = TASKS if "finder" in ids else PREVIOUS_TASKS
+    require(len(steps) == len(tasks) and ids == set(tasks), "Unknown/duplicate task")
     for step in flow["steps"]:
         fields(
             step,
@@ -117,7 +128,7 @@ def validate_workflow(flow):
                 "methodology_revision",
             ),
         )
-        skill, deps, output, kind = TASKS[step["task_id"]]
+        skill, deps, output, kind = tasks[step["task_id"]]
         require(
             step["skill"] == skill and step["produces"] == output and step["payload_type"] == kind,
             "Task role/output mismatch",
@@ -159,7 +170,21 @@ def validate_instrument(item):
     )
 
 
+def previous_radar(context):
+    reports = context.get("previous_reports", {})
+    report = reports.get("market.radar") or reports.get("market.discovery")
+    if not report:
+        return None
+    data = report["research_data"]
+    return {
+        "schema_version": 1, "kind": "radar",
+        "context_markdown": data["context_markdown"], "sources": copy.deepcopy(data["sources"]),
+    }
+
+
 def scoped_history(context, report_type, selected=None):
+    if report_type == "market.radar":
+        return previous_radar(context)
     previous = context.get("previous_reports", {}).get(report_type)
     data = copy.deepcopy(previous.get("research_data")) if previous else None
     if selected is not None and report_type in ("instrument.research", "valuation.thesis"):
@@ -199,22 +224,23 @@ def build_input(context, flow, run_id, task_id, accepted, *, followup_round=0, q
     strings(questions)
     require(not questions or followup_round == 1, "Questions require follow-up")
     require(
-        task_id != "market" or not questions and followup_round == 0,
-        "No strategy feedback to independent radar",
+        task_id not in ("market", "finder") or not questions and followup_round == 0,
+        "No strategy feedback to market radar or discovery",
     )
-    dashboard = context["dashboard"]
+    dashboard = context.get("dashboard", {})
     held_by_id = {}
-    for position in dashboard["positions"]:
-        held_by_id.setdefault(position_key(position), instrument(position))
-    held = list(held_by_id.values())
-    held_ids = {p["instrument_id"] for p in held}
+    if task_id in ("holdings", "risk", "candidates"):
+        for position in dashboard["positions"]:
+            held_by_id.setdefault(position_key(position), instrument(position))
     if task_id in ("holdings", "risk"):
-        selected = held
+        selected = list(held_by_id.values())
     elif task_id == "candidates":
+        discovery_id, = step["depends_on"]
+        discovery = accepted[discovery_id]["research_data"]
         selected = [
             c["instrument"]
-            for c in accepted["market"]["research_data"]["candidates"]
-            if c["instrument"]["instrument_id"] not in held_ids
+            for c in discovery["candidates"]
+            if c["instrument"]["instrument_id"] not in held_by_id
         ]
     elif task_id == "valuation":
         selected = [
@@ -244,43 +270,47 @@ def build_input(context, flow, run_id, task_id, accepted, *, followup_round=0, q
         "dependency_hashes": {d: digest(accepted[d]) for d in step["depends_on"]},
         "dependencies": {d: accepted[d]["research_data"] for d in step["depends_on"]},
         "previous_state": scoped_history(
-            context, step["produces"], None if task_id == "market" else ids
+            context, step["produces"], None if task_id in ("market", "finder") else ids
         ),
         "followup_round": followup_round,
         "questions": questions,
     }
-    if task_id == "market" and context.get("candidate_memory"):
+    if task_id == "finder":
+        radar = previous_radar(context)
+        if radar:
+            data["market_context"] = radar
+    if step["payload_type"] in ("discovery", "market") and context.get("candidate_memory"):
         try:
-            from .candidate_memory import radar_history
+            from .candidate_memory import discovery_history
         except ImportError:
-            from candidate_memory import radar_history
-        data["candidate_history"] = radar_history(context["candidate_memory"])
+            from candidate_memory import discovery_history
+        data["candidate_history"] = discovery_history(context["candidate_memory"])
     if task_id == "risk":
         data["current_portfolio"] = {k: dashboard[k] for k in ("snapshot", "positions")}
         data["plan"] = dashboard.get("plan")
         data["calculations"] = portfolio_risk(
             data["current_portfolio"], accepted["holdings"]["research_data"]
         )
-    # Only candidates' hypotheses reach the second R2; no private holding set or R1 history.
+    # Pass discovery evidence for the assigned candidates and keep portfolio details private.
     if task_id == "candidates":
         data["candidate_hypotheses"] = [
-            c["hypothesis"] for c in accepted["market"]["research_data"]["candidates"]
+            c["hypothesis"] for c in discovery["candidates"]
         ]
-        data["dependencies"]["market"] = {
+        data["dependencies"][discovery_id] = {
             "candidates": [
                 c
-                for c in accepted["market"]["research_data"]["candidates"]
+                for c in discovery["candidates"]
                 if c["instrument"]["instrument_id"] in ids
             ]
         }
         used_sources = {
             source
-            for candidate in data["dependencies"]["market"]["candidates"]
+            for candidate in data["dependencies"][discovery_id]["candidates"]
             for source in candidate["source_ids"]
         }
-        data["dependencies"]["market"]["sources"] = [
+        data["dependencies"][discovery_id]["sources"] = [
             source
-            for source in accepted["market"]["research_data"]["sources"]
+            for source in discovery["sources"]
             if source["source_id"] in used_sources
         ]
     if task_id == "valuation":
@@ -297,7 +327,9 @@ def source_refs(ids, known):
 def validate_payload(data, kind, selected, cutoff):
     common = ("schema_version", "kind", "sources")
     extras = {
-        "market": ("context_markdown", "candidates", "deferred"),
+        "market": ("context_markdown", "candidates", "deferred"),  # revision 2
+        "radar": ("context_markdown",),
+        "discovery": ("candidates", "deferred"),
         "instruments": ("items", "hypotheses"),
         "valuation": ("items",),
         "risk": ("items", "calculations", "findings"),
@@ -316,8 +348,11 @@ def validate_payload(data, kind, selected, cutoff):
         stamp(source["accessed_at"])
         if source["published_at"] is not None:
             require(stamp(source["published_at"]) <= stamp(cutoff), "Source published after cutoff")
-    if kind == "market":
+    if kind in ("radar", "market"):
         string(data["context_markdown"])
+    if kind == "radar":
+        return
+    if kind in ("discovery", "market"):
         strings(data["deferred"])
         require(
             isinstance(data["candidates"], list) and len(data["candidates"]) <= 8,
@@ -726,9 +761,11 @@ def compare_facts(actual, baseline):
 
 
 def aggregate(results, run_id):
-    """Four immutable reports; R2 source IDs are task-prefixed to prevent collisions."""
+    """Publish each report separately, merging only the two instrument dossier tasks."""
     reports = []
     groups = [("market",), ("holdings", "candidates"), ("valuation",), ("risk",)]
+    if "finder" in results:
+        groups.insert(1, ("finder",))
     for group in groups:
         rows = [results[k] for k in group]
         data = copy.deepcopy(rows[0]["research_data"])

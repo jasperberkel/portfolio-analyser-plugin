@@ -1,0 +1,4 @@
+interface:
+  display_name: "Instrumentensuche"
+  short_description: "Finanzprodukte mit begründetem Recherchepotenzial finden"
+  default_prompt: "Nutze $instrument-finder, um potenziell unterbewertete Aktien zu finden."

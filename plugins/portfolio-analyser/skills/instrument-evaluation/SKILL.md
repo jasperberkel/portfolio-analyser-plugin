@@ -1,5 +1,5 @@
 ---
-name: valuation-thesis-research
+name: instrument-evaluation
 description: Evaluate supplied instrument dossiers for valuation, counterarguments and changes in investment theses. Use after instrument research; not for portfolio allocation.
 ---
 
@@ -11,7 +11,7 @@ Read [valuation](../../references/research/valuation.md). Evaluate every assigne
 
 For a workflow task read only the supplied input.json and [V2 draft contract](../../references/research-contract-v2.md). Return a complete German Markdown report and `valuation` research_data in result.json within the assigned output directory. Do not access sibling task directories, the app, its credentials or publication tools. The orchestrator supplies dependencies and owns publication.
 
-For a standalone request use explicitly supplied data and produce a draft only. If required instrument/dossier/portfolio inputs are missing, request those inputs; never fetch personal app context yourself. Do not fabricate workflow IDs or invoke a full run to satisfy a standalone request.
+For a standalone request use explicitly supplied data and produce a draft only. If the instrument dossier is missing, request it; never fetch personal app context yourself. Do not fabricate workflow IDs or invoke a full run to satisfy a standalone request.
 
 ## Datenzugriff
 
